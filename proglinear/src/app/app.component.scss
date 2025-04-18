@@ -1,5 +1,5 @@
 p {
-    font-size: 3rem;
+    font-size: 2.5rem;
 }
 
 form {
@@ -35,6 +35,8 @@ mat-form-field {
     display: flex;
     justify-content: center;
     align-items: center;
+    margin-bottom: 1rem;
+    color: white
 }
 
 .content {
@@ -95,8 +97,35 @@ button {
     background-color: #D44D4D; 
 }
 
+#submit-button {
+    color: black;
+    background-color: white;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+}
+
 #submit-button:hover, .op-button:hover {
     background-color: #4A90E2; 
     color: #f0f0f0; 
     transform: translateY(-2px);
+}
+
+.results {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.result {
+    margin-top: 2rem;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+}
+
+.result h2, .result h3 {
+    margin: 1rem;
 }

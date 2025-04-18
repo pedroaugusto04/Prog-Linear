@@ -72,20 +72,26 @@ export class PlotlyComponent implements OnChanges {
 
   gerarIntersecoes() {
 
+    let indexValidIntersection = 1;
+
     for (let i = 0; i < this.intersections.length; i++) {
-        const [x, y] = this.intersections[i];
+        const [x, y, isValid] = this.intersections[i];
+
+        if (!isValid) continue;
         
         const trace = {
             x: [x],  
             y: [y],  
             mode: 'markers',  
             type: 'scatter', 
-            name: `Interseção ${i+1}`,
+            name: `Interseção ${indexValidIntersection}`,
             marker: {
                 color: 'blue', 
                 size: 8       
             }
         };
+
+        indexValidIntersection++;
 
         this.graph.data.push(trace);
     }

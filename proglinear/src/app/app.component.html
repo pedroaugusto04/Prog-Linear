@@ -1,6 +1,6 @@
 <div class="content">
     <div class="title">
-      <p>Calculadora de problemas de prog linear - 2 variáveis</p>
+      <p>Calculadora - Problemas de Otimização com 2 variáveis </p>
     </div>
     <div class="inputs">
       <form [formGroup]="restritionsForm">
@@ -76,5 +76,28 @@
       <button id = "submit-button" type="button" (click)="onSubmit()">Calcular</button>
     </div>
     <app-plotly [points]="points" [intersections]="intersections" class="graph"></app-plotly>
+    <div class = "results">
+      <div class = "result">
+        @if(maxResult != -1){
+          <h2>Resultado maximização:</h2>
+          <h3>Maior valor: {{maxResult}} </h3>
+          <h3>Encontrado para: x = {{maxResultX}}, y = {{maxResultY}} </h3>
+        } @else {
+          <h2>Não foram encontrados resultados para maximização</h2>
+        }
+      </div>
+
+      <div class = "result">
+        @if(minResult != -1){
+          <h2>Resultado minimização:</h2>
+          <h3>Menor valor: {{minResult}}</h3>
+          <h3>Encontrado para: x = {{minResultX}}, y = {{minResultY}} </h3>
+        } @else {
+          <h2>Não foram encontrados resultados para minimização</h2>
+        }
+      </div>
+
+    </div>
+    
   </div>
   

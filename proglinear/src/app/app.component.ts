@@ -7,10 +7,12 @@ import {MatIconModule} from '@angular/material/icon';
 import * as Math from 'mathjs';
 import { SympyServiceService } from './services/sympy-service.service';
 import {MatMenuModule} from '@angular/material/menu';
+import {MatSnackBar, MatSnackBarModule} from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-root',
-  imports: [PlotlyComponent,ReactiveFormsModule,MatFormFieldModule, MatInputModule, MatIconModule, MatMenuModule, PlotlyComponent
+  imports: [PlotlyComponent,ReactiveFormsModule,MatFormFieldModule, MatInputModule, MatIconModule, MatMenuModule, PlotlyComponent,
+    MatSnackBarModule
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
@@ -31,7 +33,14 @@ export class AppComponent {
   points: number[][] = [];
   intersections: number[][] = [];
 
-  constructor(private fb: FormBuilder, private sympyService: SympyServiceService) {
+  maxResult: number = -1
+  maxResultX: number = -1
+  maxResultY: number = -1
+  minResult: number = -1
+  minResultX: number = -1
+  minResultY: number = -1
+
+  constructor(private fb: FormBuilder, private sympyService: SympyServiceService, private snackBar: MatSnackBar) {
     this.restritionsForm = this.fb.group({
       x_0: 0,
       y_0: 0,
@@ -175,13 +184,41 @@ export class AppComponent {
     equations[3] = this.op1Coef;
     equations[4] = this.op2Coef;
 
-    console.log(equations);
-    
-
     this.sympyService.findPoints(equations).subscribe({
       next: (data) => {
+
+        this.snackBar.open("Processamento realizado com sucesso", "X", {
+          duration: 1000,
+          verticalPosition: "top",
+          panelClass: ["success-snackbar"],
+        });
+
         this.points = data.points;
         this.intersections = data.intersections;
+
+        this.maxResult = -1;
+        this.maxResultX = -1;
+        this.maxResultY = -1;
+
+        this.minResult = -1;
+        this.minResultX = -1;
+        this.minResultY = -1;
+
+        if (data.maxResult !== null) this.maxResult = data.maxResult;
+        if (data.maxResultX !== null) this.maxResultX = data.maxResultX;
+        if (data.maxResultY !== null) this.maxResultY = data.maxResultY;
+
+        if (data.minResult !== null) this.minResult = data.minResult;
+        if (data.minResultX !== null) this.minResultX = data.minResultX;
+        if (data.minResultY !== null) this.minResultY = data.minResultY;
+
+      },
+      error: () => {
+        this.snackBar.open("Erro ao processar. Verifique as variáveis inseridas", "X", {
+          duration: 1000,
+          verticalPosition: "top",
+          panelClass: ["error-snackbar"],
+        });
       }
     })
   }
