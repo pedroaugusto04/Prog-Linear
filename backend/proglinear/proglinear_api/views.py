@@ -3,48 +3,83 @@ import sys
 from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-import sympy as sp
+from django.http import JsonResponse
+from sympy import symbols, Eq, solve, Matrix
 
 
 @api_view(['POST'])
-def solveLinearEquation(request):
+def findPoints(request):
     equacoes_str = request.data.get("equacoes", [])
 
-    if not equacoes_str:
-        return Response({"erro": "Nenhuma equação fornecida."}, status=400)
+    num_colunas = len(equacoes_str[0])
 
-    try:
-        respostas = []
+    # associa cada indice aos valores da eq correspondente
+    equacoes_map = {i: [] for i in range(num_colunas)}
 
-        for eq_str in equacoes_str:
-            lhs, rhs = eq_str.split('=')
-            lhs_expr = sp.sympify(lhs)
-            rhs_expr = sp.sympify(rhs)
+    for linha in equacoes_str:
+        for i, valor in enumerate(linha):
+            equacoes_map[i].append(valor)
 
-            equacao = sp.Eq(lhs_expr, rhs_expr)
 
-            variaveis = list(lhs_expr.free_symbols.union(rhs_expr.free_symbols))
+    # aplica o sinal da operacao
 
-            pontos = []
+    for i in equacoes_map.keys():
+        lista = equacoes_map[i]
+        for index,valor in enumerate(lista[1:]):
+            indexOp = index + int((len(lista)) / 2) + 1
+            if indexOp >= len(lista):  break
+            valorOp = lista[indexOp]
+            if valorOp == '-':
+                lista[index+1] = -valor
 
-            if len(variaveis) >= 2:
-                x, y = variaveis[:2]
+    points = []
+    intersections = []
+    equations = []
 
-                for y_val in [0, 5]:
-                    eq_substituida = equacao.subs(y, y_val)
-                    x_val = sp.solve(eq_substituida, x)
-                    if x_val:
-                        pontos.append({str(x): x_val[0], str(y): y_val})
-            else:
-                var = variaveis[0]
-                val = sp.solve(equacao, var)
-                if val:
-                    pontos.append({str(var): val[0], 'r': sys.maxsize})
-                    pontos.append({str(var): val[0], 'r': -sys.maxsize})
+    # verifica 2 pontos para cada equacao
 
-            respostas.append(f"Pontos: {pontos}")
+    for i in equacoes_map.keys():
+        lista = equacoes_map[i]
 
-        return Response({"respostas": respostas})
+        x, y = symbols('x y')
 
-    except Exception as e:
-        return Response({"erro": f"Erro ao processar equações: {str(e)}"}, status=500)
+        A = Matrix([[lista[0],lista[1]]])
+        b = Matrix([lista[2]])
+
+        solution = solve(A * Matrix([x, y]) - b, (x, y))
+
+
+        if i != 0:
+            for var in solution:
+                equations.append(Eq(var, solution[var]))
+
+        if lista[0] != 0: # x != 0
+            x_expr = solution[x]
+            y1 = -100 # first point
+            y2 = 100 # second point
+
+            x1 = float(x_expr.subs(y, y1))
+            x2 = float(x_expr.subs(y,y2))
+            points.append([x1, y1, x2, y2])
+        else:
+            y_expr = solution[y]
+            x1 = -100  # first point
+            x2 = 100 # second point
+
+            y1 = float(y_expr.subs(x,x1))
+            y2 = float(y_expr.subs(x, x2))
+            points.append([x1, y1, x2, y2])
+
+    for i in range(len(equations)):
+        for j in range(i + 1, len(equations)):
+            sol = solve((equations[i], equations[j]), (x, y))
+
+            if sol:
+                intersections.append([float(sol[x]), float(sol[y])])
+
+    response_data = {
+        'points': points,
+        'intersections': intersections
+    }
+
+    return JsonResponse(response_data, safe=False)

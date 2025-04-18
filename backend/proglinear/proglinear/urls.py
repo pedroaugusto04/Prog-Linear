@@ -16,11 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from proglinear_api.views import solveLinearEquation
+from proglinear_api.views import findPoints
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/solvelinearequation/', solveLinearEquation),
+    path('api/findPoints/', findPoints),
 ]
 
 
