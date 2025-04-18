@@ -4,7 +4,7 @@ from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.http import JsonResponse
-from sympy import symbols, Eq, solve, Matrix
+from sympy import symbols, Eq, solve, Matrix,Le,Ge,Lt,Gt
 
 
 @api_view(['POST'])
@@ -32,9 +32,44 @@ def findPoints(request):
             if valorOp == '-':
                 lista[index+1] = -valor
 
+
     points = []
     intersections = []
     equations = []
+    inequations = []
+
+
+    # monta o sistema de  inequacoes para verificacao das intersecoes
+    for i in equacoes_map.keys():
+        if i == 0: continue # nao processa a primeira ( a primeira eh o que queremos maximizar )
+
+        lista = equacoes_map[i]
+
+        x,y = symbols('x y')
+
+        op1 = lista[3]
+
+        resultX = lista[0] * x
+        resultY = lista[1] * y
+
+        if op1 == "-":
+            resultY *= -1
+
+        lhs = resultX + resultY
+        rhs = lista[2]
+
+        op2 = lista[4]
+
+        if op2 == '=':
+            inequations.append(Eq(lhs, rhs))
+        elif op2 == '<=':
+            inequations.append(Le(lhs, rhs))
+        elif op2 == '>=':
+            inequations.append(Ge(lhs, rhs))
+        elif op2 == '<':
+            inequations.append(Lt(lhs, rhs))
+        elif op2 == '>':
+            inequations.append(Gt(lhs, rhs))
 
     # verifica 2 pontos para cada equacao
 
@@ -75,11 +110,68 @@ def findPoints(request):
             sol = solve((equations[i], equations[j]), (x, y))
 
             if sol:
-                intersections.append([float(sol[x]), float(sol[y])])
+                intersections.append([float(sol[x]), float(sol[y]),True])
+
+
+    # verifica quais intersecoes sao validas ( respeitam as inequacoes e quais nao )
+    for inequation in inequations:
+        for intersection in intersections:
+            value = {x: intersection[0],y: intersection[1]}
+
+            valid = inequation.subs(value)
+
+            if not valid:
+                intersection[2] = False
+
+
+    # recupera funcao que o usuario deseja otimizar
+    listaFuncaoOtimiza = equacoes_map[0]
+    x,y = symbols("x y")
+
+    resultX = listaFuncaoOtimiza[0] * x
+    resultY = listaFuncaoOtimiza [1] * y
+    resultZ = listaFuncaoOtimiza [2]
+    op1 = listaFuncaoOtimiza [3]
+    op2 = listaFuncaoOtimiza [4]
+
+    if op1 == "-":
+        resultY *= -1
+
+    if op2 == "-":
+        resultZ *= -1
+
+    funcaoOtimiza = resultX + resultY + resultZ
+    maxResult = -sys.maxsize
+    maxResultX = -sys.maxsize
+    maxResultY = -sys.maxsize
+
+    minResult = sys.maxsize
+    minResultX = -sys.maxsize
+    minResultY = -sys.maxsize
+
+
+    for intersection in intersections:
+        if not intersection[2]: continue
+        result = funcaoOtimiza.subs({x: intersection[0], y: intersection[1]})
+
+        if result > maxResult:
+            maxResult = result
+            maxResultX = intersection[0]
+            maxResultY = intersection[1]
+        if result < minResult:
+            minResult = result
+            minResultX = intersection[0]
+            minResultY = intersection[1]
 
     response_data = {
         'points': points,
-        'intersections': intersections
+        'intersections': intersections,
+        'maxResult': float(maxResult) if maxResult != sys.maxsize and maxResult != -sys.maxsize else None,
+        'maxResultX': float(maxResultX) if maxResultX != sys.maxsize and maxResultX != -sys.maxsize else None,
+        'maxResultY': float(maxResultY) if maxResultY != sys.maxsize and maxResultY != -sys.maxsize else None,
+        'minResult': float(minResult) if minResult != sys.maxsize and minResult != -sys.maxsize else None,
+        'minResultX': float(minResultX) if minResultX != sys.maxsize and minResultX != -sys.maxsize else None,
+        'minResultY': float(minResultY) if minResultY != sys.maxsize and minResultY != -sys.maxsize else None
     }
 
     return JsonResponse(response_data, safe=False)
