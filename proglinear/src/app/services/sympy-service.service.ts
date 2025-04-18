@@ -15,7 +15,7 @@ export class SympyServiceService {
     const payload = { equacoes };  
     
     const findPointsUrl = new URL(environment.findPointsUrl, environment.baseUrl).toString();
-    
+
     return this.http.post(findPointsUrl, payload); 
   }
 }
