@@ -7,12 +7,14 @@ import { Observable } from 'rxjs';
 })
 export class SympyServiceService {
 
-  private apiUrl = 'http://localhost:8000/api/solvelinearequation/'; 
+  private apiUrl = 'http://localhost:8000/api/findPoints/'; 
 
   constructor(private http: HttpClient) { }
 
-  solveEquations(equacoes: string[]): Observable<any> {
+  findPoints(equacoes: string[][] | number[][]): Observable<any> {
+    
     const payload = { equacoes };  
+    
     return this.http.post(this.apiUrl, payload); 
   }
 }

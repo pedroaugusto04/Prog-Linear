@@ -9,6 +9,24 @@ form {
 
 }
 
+#field-function {
+    width: 300px;
+}
+
+
+.input {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 800px;
+}
+
+#input_0 {
+    width: 715px;
+}
+
+
+
 mat-form-field {
     margin: 2rem;
 }
@@ -37,7 +55,7 @@ mat-form-field {
     justify-content: center;
     align-items: flex-start;
     background-color: #F0F0F0;
-    width: 430px;
+    width: 800px;
     max-height: 300px;
     overflow-y: auto; 
     overflow-x: hidden;
@@ -46,6 +64,8 @@ mat-form-field {
 .restrition-inputs {
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 .inputs {
@@ -53,12 +73,6 @@ mat-form-field {
     justify-content: center;
     align-items: center;
     flex-direction: column;
-}
-
-.input {
-    display: flex;
-    align-items: center;
-    gap: 8px;
 }
 
 button {
@@ -73,14 +87,16 @@ button {
     transition: background-color 0.3s, color 0.3s, transform 0.2s ease-in-out;
 }
 
-#add-button:hover, #submit-button:hover {
-    background-color: #4A90E2; 
-    color: #f0f0f0; 
-    transform: translateY(-2px);
+#add-button {
+    background-color: #4A90E2;
 }
 
-#delete-button:hover {
+#delete-button {
     background-color: #D44D4D; 
+}
+
+#submit-button:hover, .op-button:hover {
+    background-color: #4A90E2; 
     color: #f0f0f0; 
     transform: translateY(-2px);
 }
