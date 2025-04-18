@@ -6,6 +6,9 @@ from rest_framework.response import Response
 from django.http import JsonResponse
 from sympy import symbols, Eq, solve, Matrix,Le,Ge,Lt,Gt
 
+@api_view(['GET'])
+def ping(request):
+    return Response("API Online")
 
 @api_view(['POST'])
 def findPoints(request):

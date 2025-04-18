@@ -17,10 +17,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from proglinear_api.views import findPoints
+from proglinear_api.views import ping
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/findPoints/', findPoints),
+    path('api/ping/',ping)
 ]
 
 
