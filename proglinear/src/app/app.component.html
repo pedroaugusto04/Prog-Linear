@@ -1,0 +1,35 @@
+<div class="content">
+    <div class="title">
+      <p>Calculadora de problemas de prog linear - 2 variáveis</p>
+    </div>
+    <div class="inputs">
+      <form [formGroup]="restritionsForm">
+        <div class = "content-inputs">
+            <div class = "restrition-inputs">
+                @for (restrition of restritions; track restrition; let i = $index){
+                    <div class = "input">
+                        <mat-form-field appearance="outline">
+                            <mat-label>Digite uma Restrição</mat-label>
+                            <input matInput placeholder="x + y <= 10" [formControlName]="'restrition_' + i">
+                          </mat-form-field>
+                          <button id = "add-button" mat-icon-button (click)="addRestrition()">
+                            <mat-icon>add</mat-icon> 
+                        </button>
+                        
+                        @if(i != 0){
+                            <button id = "delete-button" mat-icon-button (click)="removeRestrition(i)">
+                                <mat-icon>delete</mat-icon> 
+                            </button>
+                        }
+                    </div>
+                    
+                }
+            </div>
+
+        </div>
+      </form>
+      <button id = "submit-button" type="button" (click)="onSubmit()">Calcular</button>
+    </div>
+    <app-plotly class="graph"></app-plotly>
+  </div>
+  
