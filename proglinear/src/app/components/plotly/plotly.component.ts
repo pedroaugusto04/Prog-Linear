@@ -3,6 +3,7 @@ import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/cor
 import { PlotlyModule } from 'angular-plotly.js';
 import { number } from 'mathjs';
 import * as PlotlyJS from 'plotly.js-dist-min';
+import { BreakpointObserver } from "@angular/cdk/layout";
 
 PlotlyModule.plotlyjs = PlotlyJS;
 
@@ -13,10 +14,30 @@ PlotlyModule.plotlyjs = PlotlyJS;
   templateUrl: './plotly.component.html',
   styleUrl: './plotly.component.scss'
 })
-export class PlotlyComponent implements OnChanges {
+export class PlotlyComponent implements OnChanges, OnInit {
   
   @Input() points: number[][] = [];
   @Input() intersections: number[][] = [];
+
+  isMobile: boolean = false;
+
+  constructor(private mobileObserver: BreakpointObserver) {}
+
+  ngOnInit() {
+    this.mobileObserver.observe(['(max-width: 800px)']).subscribe((screenSize) => {
+      if (screenSize.matches) {
+        this.isMobile = true;
+      } else {
+        this.isMobile = false;
+      }
+
+      this.graph.layout = {
+        ...this.graph.layout,
+        width: this.isMobile ? 350 : 1000,
+        height: this.isMobile ? 350 : 600,
+      };
+    });
+  }
 
   public graph: { data: { x: number[], y: number[], mode: string }[]; layout: any } = {
     data: [],

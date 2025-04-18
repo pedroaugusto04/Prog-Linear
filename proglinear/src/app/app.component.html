@@ -15,7 +15,7 @@
                     <div class = "input" [id]="'input_' + i">
                         <mat-form-field class = "field-coef" appearance="outline">
                             <mat-label>X</mat-label>
-                            <input type="number" matInput placeholder="2" [formControlName]="'x_' + i">
+                            <input type="number" placeholder="0" matInput [formControlName]="'x_' + i">
                           </mat-form-field>
 
                           <button class = "op-button" mat-button [matMenuTriggerFor]="menuOp1">
@@ -28,7 +28,7 @@
 
                           <mat-form-field class = "field-coef" appearance="outline">
                           <mat-label>Y</mat-label>
-                          <input type="number" matInput placeholder="3" [formControlName]="'y_' + i">
+                          <input type="number" matInput placeholder="0" [formControlName]="'y_' + i">
                           </mat-form-field>
 
                           @if(i == 0){
@@ -54,12 +54,14 @@
                             
                           <mat-form-field class = "field-coef" appearance="outline">
                             <mat-label>C</mat-label>
-                            <input type="number" matInput placeholder="3" [formControlName]="'const_' + i">
+                            <input type="number" matInput placeholder="0" [formControlName]="'const_' + i">
                             </mat-form-field>
-                      
-                        <button id = "add-button" mat-icon-button (click)="addRestrition()">
-                          <mat-icon>add</mat-icon> 
-                        </button>
+                            
+                        @if (i > 0){
+                          <button id = "add-button" mat-icon-button (click)="addRestrition()">
+                            <mat-icon>add</mat-icon> 
+                          </button>
+                        }
                         
                         @if(i > 1){
                             <button id = "delete-button" mat-icon-button (click)="removeRestrition(i)">

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { PlotlyComponent } from './components/plotly/plotly.component';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import {MatFormFieldModule} from '@angular/material/form-field';
@@ -40,6 +40,8 @@ export class AppComponent {
   minResultX: number = -1
   minResultY: number = -1
 
+  isMobile: boolean = false;
+
   constructor(private fb: FormBuilder, private sympyService: SympyServiceService, private snackBar: MatSnackBar) {
     this.restritionsForm = this.fb.group({
       x_0: 0,
@@ -49,12 +51,13 @@ export class AppComponent {
       op2Coef_0: "+",
       x_1: 0,
       y_1: 0,
-      const_1: 1,
+      const_1: 0,
       op1Coef_1: "+",
       op2Coef_1: "=",
     });
 
   }
+
 
   addRestrition() {
     const newEqIndex = this.restritions.length;

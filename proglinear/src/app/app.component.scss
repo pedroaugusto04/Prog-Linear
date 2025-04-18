@@ -129,3 +129,30 @@ button {
 .result h2, .result h3 {
     margin: 1rem;
 }
+
+@media screen and (max-width: 800px) {
+    .input {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 3px;
+        margin-left: 2rem;
+    }
+
+    #input_0 {
+        margin-left: 0;
+    }
+
+    #input_1 {
+        margin-right: 2.8rem;
+    }
+
+    mat-form-field {
+        margin: 0rem;
+        width: 65px;
+    }
+
+    button {
+        margin: 0.2rem;
+    }
+}
