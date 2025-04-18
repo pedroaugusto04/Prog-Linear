@@ -5,6 +5,42 @@ html, body {
     height: auto;
     margin: 0;
     padding: 0;
+    background-color: black;
 }
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+
+.success-snackbar.mat-mdc-snack-bar-container {
+    margin-top: 2rem !important;
+    .mdc-snackbar__surface {
+      background: green;
+  
+      .mat-mdc-button {
+        color: white !important;
+      }
+    }
+  
+    .mat-mdc-snack-bar-label.mdc-snackbar__label {
+      color: white;
+      font-weight: 500;
+      white-space: pre-wrap;
+    }
+  }
+  
+  .error-snackbar.mat-mdc-snack-bar-container {
+    margin-top: 2rem !important;
+    .mdc-snackbar__surface {
+      background: red;
+      
+      .mat-mdc-button {
+        color: white !important;
+      }
+    }
+  
+    .mat-mdc-snack-bar-label.mdc-snackbar__label {
+      color: white;
+      font-weight: 500;
+      white-space: pre-wrap;
+    }
+  }
