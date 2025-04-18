@@ -4,7 +4,8 @@ import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 import {MatIconModule} from '@angular/material/icon';
-import * as math from 'mathjs';
+import * as Math from 'mathjs';
+import { SympyServiceService } from './services/sympy-service.service';
 
 @Component({
   selector: 'app-root',
@@ -17,8 +18,9 @@ export class AppComponent {
 
   restritionsForm: FormGroup;
   restritions: any[] = [{ id: 1 }]; 
+  points: { x: number; y: number }[][] = [];
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private sympyService: SympyServiceService) {
     this.restritionsForm = this.fb.group({
       restrition_0: ""
     });
@@ -53,18 +55,56 @@ export class AppComponent {
   }
 
   onSubmit() {
-    let equations: any[] = [];
+    const equations: string[] = [];
 
     Object.keys(this.restritionsForm.controls).forEach((key) => {
       const control = this.restritionsForm.get(key);  
       if (control && control.value) {
-        const equation = control.value;
+        let equation: string = control.value;
 
-        const f = math.parse(equation);  
-        const simp = math.simplify(f);   
-        equations.push(simp);
+        equation = this.replaceInequation(equation);
+
+        equations.push(equation);
       }
     });
 
+    this.sympyService.solveEquations(equations).subscribe({
+      next:(data) => {
+        if (data.respostas) {
+
+          this.points = []; 
+
+          data.respostas.forEach((resposta: string) => {
+            try {
+              const jsonPart = resposta
+                .replace('Pontos: ', '')
+                .replace(/'/g, '"') 
+                .replace(/\b(\w+)\b(?=\s*:)/g, '"$1"');
+
+              const parsed = JSON.parse(jsonPart);
+
+              this.points.push(...parsed);
+
+            } catch (e) {
+              console.error('Erro ao converter resposta:', resposta, e);
+            }
+          });
+        }
+      },
+    })
+
+  }
+
+  replaceInequation(equation: string): string {
+    equation = equation.replace(">=", "=");
+    equation = equation.replace("<=", "=");
+    equation = equation.replace(">", "=");
+    equation = equation.replace("<", "=");
+    equation = equation.replace("==", "=");
+
+    // mantem no maximo dois iguais em sequencia
+    equation = equation.replace(/={2,}/g, "=");
+    
+    return equation;
   }
 }
