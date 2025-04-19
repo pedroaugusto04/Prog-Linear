@@ -1,3 +1,4 @@
+import os
 import sys
 
 from django.shortcuts import render
@@ -5,6 +6,12 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.http import JsonResponse
 from sympy import symbols, Eq, solve, Matrix,Le,Ge,Lt,Gt
+from dotenv import load_dotenv
+from pathlib import Path
+
+
+if os.getenv("ENV") != "production":
+    load_dotenv(dotenv_path=Path(__file__).resolve().parent.parent / '.env')
 
 @api_view(['GET'])
 def ping(request):
@@ -93,16 +100,16 @@ def findPoints(request):
 
         if lista[0] != 0: # x != 0
             x_expr = solution[x]
-            y1 = -100 # first point
-            y2 = 100 # second point
+            y1 = float(os.getenv("MIN_VAR", "-100")) # first point
+            y2 = float(os.getenv("MAX_VAR", "100")) # second point
 
             x1 = float(x_expr.subs(y, y1))
             x2 = float(x_expr.subs(y,y2))
             points.append([x1, y1, x2, y2])
         else:
             y_expr = solution[y]
-            x1 = -100  # first point
-            x2 = 100 # second point
+            x1 = float(os.getenv("MIN_VAR", "-100")) # first point
+            x2 = float(os.getenv("MAX_VAR", "100")) # second point
 
             y1 = float(y_expr.subs(x,x1))
             y2 = float(y_expr.subs(x, x2))
