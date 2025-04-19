@@ -77,6 +77,16 @@ mat-form-field {
     flex-direction: column;
 }
 
+.plotly-graph {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.graph {
+    max-width: 800px;
+}
+
 button {
     all: unset;
     cursor: pointer;
@@ -97,14 +107,14 @@ button {
     background-color: #D44D4D; 
 }
 
-#submit-button {
+#submit-button, #see-results-button {
     color: black;
     background-color: white;
     margin-top: 2rem;
     margin-bottom: 2rem;
 }
 
-#submit-button:hover, .op-button:hover {
+#submit-button:hover, .op-button:hover, #see-results-button:hover {
     background-color: #4A90E2; 
     color: #f0f0f0; 
     transform: translateY(-2px);
@@ -115,6 +125,7 @@ button {
     justify-content: center;
     align-items: center;
     flex-direction: column;
+    margin-bottom: 2rem;
 }
 
 .result {
@@ -128,6 +139,11 @@ button {
 
 .result h2, .result h3 {
     margin: 1rem;
+}
+
+.calcs-text {
+    color: white;
+    width: 100%;
 }
 
 @media screen and (max-width: 800px) {

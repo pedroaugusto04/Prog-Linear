@@ -1,0 +1,52 @@
+p {
+    margin-left: 1rem;
+    margin-right: 1rem;
+    font-size: 1.4rem;
+}
+
+.dialog-title {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 1rem;  
+}
+
+.dialog-title button {
+    all: unset;
+    cursor: pointer;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+  
+.dialog-title button:hover {
+    background-color: #ccc;
+    color: #000;
+}
+
+.calcs-text {
+    color: black;
+}
+
+.result-calcs p {
+    font-size: 1.4rem;
+    max-width: 100%;
+    word-wrap: break-word;     
+    overflow-wrap: break-word;   
+    white-space: normal;   
+}
+
+.valid {
+    background-color: #4caf50;
+    padding: 0.5rem;
+    border-radius: 5px;      
+  }
+  
+.invalid {
+    background-color: #f44336;  
+    padding: 0.5rem;
+    border-radius: 5px;     
+}

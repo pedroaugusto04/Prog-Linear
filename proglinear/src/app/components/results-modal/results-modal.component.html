@@ -1,0 +1,17 @@
+@if(modal.valuesTested.length === 0){
+  <p><br><br><br>Não foram encontrados resultados</p>
+}
+@for (value of modal.valuesTested; track value; let i = $index){
+    @if (i == 0){
+      <p>Interseções encontradas: </p>
+    } 
+    <p class = "calcs-text"
+    [ngClass]="{ 'valid': value.isValid, 'invalid': !value.isValid }"
+    >x: {{value.x}}, y: {{value.y}}, Resultado: {{value.result}}</p>
+}
+
+<div mat-dialog-title class="dialog-title">
+  <button (click)="closeDialog()" mat-icon-button aria-label="close dialog" mat-dialog-close>
+    <mat-icon>close</mat-icon>
+  </button>
+</div>

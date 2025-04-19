@@ -4,15 +4,17 @@ import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 import {MatIconModule} from '@angular/material/icon';
-import * as Math from 'mathjs';
 import { SympyServiceService } from './services/sympy-service.service';
 import {MatMenuModule} from '@angular/material/menu';
 import {MatSnackBar, MatSnackBarModule} from '@angular/material/snack-bar';
+import { Calculation } from './models/Calculation';
+import { CommonModule } from '@angular/common';
+import { ResultsModalService } from './components/results-modal/services/results-modal.service';
 
 @Component({
   selector: 'app-root',
   imports: [PlotlyComponent,ReactiveFormsModule,MatFormFieldModule, MatInputModule, MatIconModule, MatMenuModule, PlotlyComponent,
-    MatSnackBarModule
+    MatSnackBarModule,CommonModule
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
@@ -32,6 +34,7 @@ export class AppComponent {
 
   points: number[][] = [];
   intersections: number[][] = [];
+  valuesTested: Calculation[] = [];
 
   maxResult: number = -1
   maxResultX: number = -1
@@ -42,7 +45,9 @@ export class AppComponent {
 
   isMobile: boolean = false;
 
-  constructor(private fb: FormBuilder, private sympyService: SympyServiceService, private snackBar: MatSnackBar) {
+  constructor(private fb: FormBuilder, private sympyService: SympyServiceService, private snackBar: MatSnackBar,
+    private resultsModalService: ResultsModalService
+  ) {
     this.restritionsForm = this.fb.group({
       x_0: 0,
       y_0: 0,
@@ -198,6 +203,7 @@ export class AppComponent {
 
         this.points = data.points;
         this.intersections = data.intersections;
+        this.valuesTested = data.valuesTested;
 
         this.maxResult = -1;
         this.maxResultX = -1;
@@ -233,5 +239,9 @@ export class AppComponent {
 
   setOp2Coef(index: number, value: string): void {
     this.restritionsForm.get('op2Coef_' + index)?.setValue(value);
+  }
+
+  openResultsModal() {
+    this.resultsModalService.openDialog(this.valuesTested);
   }
 }
