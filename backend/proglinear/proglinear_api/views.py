@@ -47,7 +47,7 @@ def findPoints(request):
     intersections = []
     equations = []
     inequations = []
-
+    valuesTested = []
 
     # monta o sistema de  inequacoes para verificacao das intersecoes
     for i in equacoes_map.keys():
@@ -161,8 +161,10 @@ def findPoints(request):
 
 
     for intersection in intersections:
-        if not intersection[2]: continue
         result = funcaoOtimiza.subs({x: intersection[0], y: intersection[1]})
+        if not intersection[2]:
+            valuesTested.append({'x': float(intersection[0]), 'y': float(intersection[1]), 'result': float(result), 'isValid': False})
+            continue
 
         if result > maxResult:
             maxResult = result
@@ -173,9 +175,12 @@ def findPoints(request):
             minResultX = intersection[0]
             minResultY = intersection[1]
 
+        valuesTested.append({'x': float(intersection[0]), 'y': float(intersection[1]), 'result': float(result), 'isValid': True})
+
     response_data = {
         'points': points,
         'intersections': intersections,
+        'valuesTested': valuesTested,
         'maxResult': float(maxResult) if maxResult != sys.maxsize and maxResult != -sys.maxsize else None,
         'maxResultX': float(maxResultX) if maxResultX != sys.maxsize and maxResultX != -sys.maxsize else None,
         'maxResultY': float(maxResultY) if maxResultY != sys.maxsize and maxResultY != -sys.maxsize else None,
