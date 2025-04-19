@@ -1,6 +1,6 @@
 # Prog-Linear
 
-Resolve problemas de programação linear utilizando o método gráfico ( até 2 variáveis )
+Resolve problemas de programação linear utilizando o método gráfico ( 2 variáveis )
 
 ![image](https://github.com/user-attachments/assets/f840bce3-1510-4a5b-942f-372095af6ed0)
 
