@@ -19,6 +19,7 @@ def ping(request):
 
 @api_view(['POST'])
 def findPoints(request):
+    INFINITE_RESULT = -2
     equacoes_str = request.data.get("equacoes", [])
 
     num_colunas = len(equacoes_str[0])
@@ -251,12 +252,12 @@ def findPoints(request):
     # percorre todos os valores possiveis dentro do range ( metodo matematico )
     if limSupX == sys.maxsize or limSupY == sys.maxsize:
         #max
-        maxResult = -2 # indica que o maior valor pode ser infinito
-        maxResultX = -2 if limSupX == sys.maxsize else float(limSupX)
-        maxResultY = -2 if limSupY == sys.maxsize else float(limSupY)
+        maxResult = INFINITE_RESULT # indica que o maior valor pode ser infinito
+        maxResultX = INFINITE_RESULT if limSupX == sys.maxsize else float(limSupX)
+        maxResultY = INFINITE_RESULT if limSupY == sys.maxsize else float(limSupY)
 
-        valuesTestedMathematical.append({'x': float(-2 if limSupX == sys.maxsize else float(limSupX)),
-                                         'y': float(-2 if limSupY == sys.maxsize else float(limSupY)), 'result': float(-2), 'isValid': True})
+        valuesTestedMathematical.append({'x': float(INFINITE_RESULT if limSupX == sys.maxsize else float(limSupX)),
+                                         'y': float(INFINITE_RESULT if limSupY == sys.maxsize else float(limSupY)), 'result': float(INFINITE_RESULT), 'isValid': True})
         #min
         result = funcaoOtimiza.subs({x: limInfX, y: limInfY})
         minResult = result
@@ -293,7 +294,7 @@ def findPoints(request):
             valuesTested.append({'x': float(intersection[0]), 'y': float(intersection[1]), 'result': float(result), 'isValid': False})
             continue
 
-        if result > maxResult:
+        if result > maxResult and maxResult != INFINITE_RESULT:
             maxResult = result
             maxResultX = intersection[0]
             maxResultY = intersection[1]
