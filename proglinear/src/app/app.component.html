@@ -81,12 +81,13 @@
       <app-plotly [points]="points" [intersections]="intersections" class="graph"></app-plotly>
     </div>
     <div class = "results">
-      <button id = "see-results-button" type="button" (click)="openResultsModal()">Ver Detalhes</button>
+      <button id = "see-results-button" type="button" (click)="openResultsModal()">Ver Detalhes ( Método Gráfico )</button>
+      <button id = "see-results-button" type="button" (click)="openResultsModalMathematical()">Ver Detalhes ( Método Matemático )</button>
       <div class = "result">
         @if(maxResult != -1){
           <h2>Resultado maximização:</h2>
-          <h3>Maior valor: {{maxResult}} </h3>
-          <h3>Encontrado para: x = {{maxResultX}}, y = {{maxResultY}} </h3>
+          <h3>Maior valor: {{ maxResult === -2 ? 'Infinito' : maxResult }} </h3>
+          <h3>Encontrado para: x = {{maxResultX === -2? 'Infinito': maxResultX}}, y = {{maxResultY === -2? 'Infinito': maxResultY}} </h3>
         } @else {
           <h2>Não foram encontrados resultados para maximização</h2>
         }

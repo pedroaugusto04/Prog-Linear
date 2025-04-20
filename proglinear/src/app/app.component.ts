@@ -35,6 +35,7 @@ export class AppComponent {
   points: number[][] = [];
   intersections: number[][] = [];
   valuesTested: Calculation[] = [];
+  valuesTestedMathematical: Calculation[] = [];
 
   maxResult: number = -1
   maxResultX: number = -1
@@ -204,6 +205,7 @@ export class AppComponent {
         this.points = data.points;
         this.intersections = data.intersections;
         this.valuesTested = data.valuesTested;
+        this.valuesTestedMathematical = data.valuesTestedMathematical;
 
         this.maxResult = -1;
         this.maxResultX = -1;
@@ -242,6 +244,10 @@ export class AppComponent {
   }
 
   openResultsModal() {
-    this.resultsModalService.openDialog(this.valuesTested);
+    this.resultsModalService.openDialog(this.valuesTested,true);
+  }
+
+  openResultsModalMathematical() {
+    this.resultsModalService.openDialog(this.valuesTestedMathematical,false);
   }
 }

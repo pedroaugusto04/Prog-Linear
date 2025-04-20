@@ -3,11 +3,12 @@
 }
 @for (value of modal.valuesTested; track value; let i = $index){
     @if (i == 0){
-      <p>Interseções encontradas: </p>
+      <p>{{ modal.isGraphical ? 'Interseções encontradas:' : 'Valores Testados:' }}</p>
     } 
     <p class = "calcs-text"
     [ngClass]="{ 'valid': value.isValid, 'invalid': !value.isValid }"
-    >x: {{value.x}}, y: {{value.y}}, Resultado: {{value.result}}</p>
+    >x: {{value.x === -2? 'Infinito': value.x}}, y: {{value.y === -2? 'Infinito': value.y}}, Resultado: {{value.result === -2? 
+    'Infinito': value.result}}</p>
 }
 
 <div mat-dialog-title class="dialog-title">

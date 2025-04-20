@@ -14,7 +14,7 @@ import { ResultsModalService } from './services/results-modal.service';
 export class ResultsModalComponent {
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) public modal: { valuesTested: Calculation[] },
+    @Inject(MAT_DIALOG_DATA) public modal: { valuesTested: Calculation[], isGraphical: boolean },
     private resultsModalService: ResultsModalService
   ) {}
 

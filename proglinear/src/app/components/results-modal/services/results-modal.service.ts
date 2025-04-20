@@ -11,9 +11,9 @@ export class ResultsModalService {
 
   constructor(private dialog: MatDialog) { }
 
-  openDialog(valuesTested: Calculation[]) {
+  openDialog(valuesTested: Calculation[], isGraphical: boolean) {
     this.dialog.open(ResultsModalComponent, {
-      data: {valuesTested},
+      data: {valuesTested,isGraphical},
       width: "90%",
       height: "95%",
     });
