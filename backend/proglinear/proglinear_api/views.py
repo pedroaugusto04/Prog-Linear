@@ -119,8 +119,8 @@ def findPoints(request):
 
     for i in range(len(equations)):
         for j in range(i + 1, len(equations)):
+            if equations[i] == equations[j]: continue
             sol = solve((equations[i], equations[j]), (x, y))
-
             if sol:
                 intersections.append([float(sol[x]), float(sol[y]),True])
 
