@@ -136,11 +136,12 @@ def findPoints(request):
                 intersection[2] = False
 
     # METODO MATEMATICO
-    # verifica o limite inferior e superior de cada variavel
+    # verifica o limite superior de cada variavel
     limInfX = 0
     limSupX = sys.maxsize
     limInfY = 0
     limSupY = sys.maxsize
+    isPossible = True # verifica se nao tem contradicao, do tipo, x = 5 e x = 4
     for inequation in inequations:
 
         valueX = {y: 0}
@@ -168,13 +169,12 @@ def findPoints(request):
                     if valor in (oo, -oo): continue
 
                     valor = valor.evalf()
-                    if op == "<":
-                        limInfX = max(limInfX,int(valor + 1))
-                    elif op == "<=":
-                        limInfX = max(limInfX,int(valor))
-                    elif op == "==":
-                        limSupX = int(valor)
-                        limInfX = int(valor)
+                    if op == "==":
+                        if limInfX <= int(valor) <= limSupX:
+                            limSupX = int(valor)
+                            limInfX = int(valor)
+                        else:
+                            isPossible = False
 
                 elif cond.lhs == x:
                     valor = cond.rhs
@@ -186,8 +186,11 @@ def findPoints(request):
                     elif op == "<=":
                         limSupX = min(limSupX, int(valor))
                     elif op == "==":
-                        limSupX = int(valor)
-                        limInfX = int(valor)
+                        if limInfX <= int(valor) <= limSupX:
+                            limSupX = int(valor)
+                            limInfX = int(valor)
+                        else:
+                            isPossible = False
 
         if resultY != True and resultY != False:
             x = symbols('x')
@@ -201,13 +204,12 @@ def findPoints(request):
                     if valor in (oo, -oo): continue
 
                     valor = valor.evalf()
-                    if op == "<":
-                        limInfY = max(limInfY, int(valor + 1))
-                    elif op == "<=":
-                        limInfY = max(limInfY, int(valor))
-                    elif op == "==":
-                        limInfY = int(valor)
-                        limSupY = int(valor)
+                    if op == "==":
+                        if limInfY <= int(valor) <= limSupY:
+                            limInfY = int(valor)
+                            limSupY = int(valor)
+                        else:
+                            isPossible = False
 
                 elif cond.lhs == y:
                     valor = cond.rhs
@@ -219,8 +221,11 @@ def findPoints(request):
                     elif op == "<=":
                         limSupY = min(limSupY, int(valor))
                     elif op == "==":
-                        limInfY = int(valor)
-                        limSupY = int(valor)
+                        if limInfY <= int(valor) <= limSupY:
+                            limInfY = int(valor)
+                            limSupY = int(valor)
+                        else:
+                            isPossible = False
 
 
     # recupera funcao que o usuario deseja otimizar
@@ -257,13 +262,13 @@ def findPoints(request):
         maxResultY = INFINITE_RESULT if limSupY == sys.maxsize else float(limSupY)
 
         valuesTestedMathematical.append({'x': float(INFINITE_RESULT if limSupX == sys.maxsize else float(limSupX)),
-                                         'y': float(INFINITE_RESULT if limSupY == sys.maxsize else float(limSupY)), 'result': float(INFINITE_RESULT), 'isValid': True})
+                                         'y': float(INFINITE_RESULT if limSupY == sys.maxsize else float(limSupY)), 'result': float(INFINITE_RESULT), 'isValid': isPossible})
         #min
         result = funcaoOtimiza.subs({x: limInfX, y: limInfY})
         minResult = result
         minResultX = limInfX
         minResultY = limInfY
-        valuesTestedMathematical.append({'x': float(limInfX), 'y': float(limInfY), 'result': float(result), 'isValid': True})
+        valuesTestedMathematical.append({'x': float(limInfX), 'y': float(limInfY), 'result': float(result), 'isValid': isPossible})
     else:
         for a in range(limInfX, limSupX + 1):
             for b in range(limInfY, limSupY + 1):
@@ -275,7 +280,7 @@ def findPoints(request):
                         if not valid:
                             isValid = False
                             break
-                valuesTestedMathematical.append({'x': float(a), 'y': float(b), 'result': float(result), 'isValid': isValid})
+                valuesTestedMathematical.append({'x': float(a), 'y': float(b), 'result': float(result), 'isValid': isValid and isPossible})
                 if isValid:
                     if result > maxResult:
                         maxResult = result
@@ -303,7 +308,7 @@ def findPoints(request):
             minResultX = intersection[0]
             minResultY = intersection[1]
 
-        valuesTested.append({'x': float(intersection[0]), 'y': float(intersection[1]), 'result': float(result), 'isValid': True})
+        valuesTested.append({'x': float(intersection[0]), 'y': float(intersection[1]), 'result': float(result), 'isValid': isPossible})
 
     response_data = {
         'points': points,
