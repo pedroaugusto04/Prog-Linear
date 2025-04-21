@@ -3,7 +3,7 @@
 }
 @for (value of modal.valuesTested; track value; let i = $index){
     @if (i == 0){
-      <p>{{ modal.isGraphical ? 'Interseções encontradas:' : 'Valores Testados:' }}</p>
+      <p>Interseções encontradas:</p>
     } 
     <p class = "calcs-text"
     [ngClass]="{ 'valid': value.isValid, 'invalid': !value.isValid }"

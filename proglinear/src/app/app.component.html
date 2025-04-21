@@ -81,8 +81,7 @@
       <app-plotly [points]="points" [intersections]="intersections" class="graph"></app-plotly>
     </div>
     <div class = "results">
-      <button id = "see-results-button" type="button" (click)="openResultsModal()">Ver Detalhes ( Método Gráfico )</button>
-      <button id = "see-results-button" type="button" (click)="openResultsModalMathematical()">Ver Detalhes ( Método Matemático )</button>
+      <button id = "see-results-button" type="button" (click)="openResultsModal()">Ver Detalhes</button>
       <div class = "result">
         @if(maxResult != -1){
           <h2>Resultado maximização:</h2>
