@@ -49,7 +49,6 @@ def findPoints(request):
     equations = []
     inequations = []
     valuesTested = []
-    valuesTestedMathematical = []
 
     # monta o sistema de  inequacoes para verificacao das intersecoes
     for i in equacoes_map.keys():
@@ -135,8 +134,7 @@ def findPoints(request):
             if not valid:
                 intersection[2] = False
 
-    # METODO MATEMATICO
-    # verifica o limite superior de cada variavel
+    # verifica o limite inferior superior de cada variavel ( verificar casos de borda - 0 ou infinito )
     limInfX = 0
     limSupX = sys.maxsize
     limInfY = 0
@@ -254,42 +252,20 @@ def findPoints(request):
     minResultY = -sys.maxsize
 
 
-    # percorre todos os valores possiveis dentro do range ( metodo matematico )
     if limSupX == sys.maxsize or limSupY == sys.maxsize:
         #max
         maxResult = INFINITE_RESULT # indica que o maior valor pode ser infinito
         maxResultX = INFINITE_RESULT if limSupX == sys.maxsize else float(limSupX)
         maxResultY = INFINITE_RESULT if limSupY == sys.maxsize else float(limSupY)
 
-        valuesTestedMathematical.append({'x': float(INFINITE_RESULT if limSupX == sys.maxsize else float(limSupX)),
+        valuesTested.append({'x': float(INFINITE_RESULT if limSupX == sys.maxsize else float(limSupX)),
                                          'y': float(INFINITE_RESULT if limSupY == sys.maxsize else float(limSupY)), 'result': float(INFINITE_RESULT), 'isValid': isPossible})
         #min
         result = funcaoOtimiza.subs({x: limInfX, y: limInfY})
         minResult = result
         minResultX = limInfX
         minResultY = limInfY
-        valuesTestedMathematical.append({'x': float(limInfX), 'y': float(limInfY), 'result': float(result), 'isValid': isPossible})
-    else:
-        for a in range(limInfX, limSupX + 1):
-            for b in range(limInfY, limSupY + 1):
-                result = funcaoOtimiza.subs({x: a, y: b})
-                isValid = True
-                for inequation in inequations:
-                        value = {x: float(a), y: float(b)}
-                        valid = inequation.subs(value)
-                        if not valid:
-                            isValid = False
-                            break
-                valuesTestedMathematical.append({'x': float(a), 'y': float(b), 'result': float(result), 'isValid': isValid and isPossible})
-                if isValid:
-                    if result > maxResult:
-                        maxResult = result
-                        maxResultX = float(a)
-                        maxResultY = float(b)
-                    if result < minResult:
-                        minResult = result
-                        minResultX = float(a)
-                        minResultY = float(b)
+        valuesTested.append({'x': float(limInfX), 'y': float(limInfY), 'result': float(result), 'isValid': isPossible})
 
     # percorre as intersecoes ( metodo grafico )
     for intersection in intersections:
@@ -314,7 +290,6 @@ def findPoints(request):
         'points': points,
         'intersections': intersections,
         'valuesTested': valuesTested,
-        'valuesTestedMathematical':valuesTestedMathematical,
         'maxResult': float(maxResult) if maxResult != -sys.maxsize else None,
         'maxResultX': float(maxResultX)  if maxResultX != -sys.maxsize else None,
         'maxResultY': float(maxResultY) if maxResultY != -sys.maxsize else None,
