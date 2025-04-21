@@ -58,13 +58,8 @@ def findPoints(request):
 
         x,y = symbols('x y')
 
-        op1 = lista[3]
-
         resultX = lista[0] * x
         resultY = lista[1] * y
-
-        if op1 == "-":
-            resultY *= -1
 
         lhs = resultX + resultY
         rhs = lista[2]
@@ -234,16 +229,9 @@ def findPoints(request):
     resultX = listaFuncaoOtimiza[0] * x
     resultY = listaFuncaoOtimiza[1] * y
     resultZ = listaFuncaoOtimiza[2]
-    op1 = listaFuncaoOtimiza[3]
-    op2 = listaFuncaoOtimiza[4]
-
-    if op1 == "-":
-        resultY *= -1
-
-    if op2 == "-":
-        resultZ *= -1
 
     funcaoOtimiza = resultX + resultY + resultZ
+
     maxResult = -sys.maxsize
     maxResultX = -sys.maxsize
     maxResultY = -sys.maxsize
