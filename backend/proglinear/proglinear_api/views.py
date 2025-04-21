@@ -252,6 +252,12 @@ def findPoints(request):
     minResultX = -sys.maxsize
     minResultY = -sys.maxsize
 
+    minAxisX = sys.maxsize
+    maxAxisX = -sys.maxsize
+
+    minAxisY = sys.maxsize
+    maxAxisY = -sys.maxsize
+
     # verfiica se nao tem restricao superior ( resultado maximo infinito )
     if (limSupX == sys.maxsize or limSupY == sys.maxsize) and isPossible:
         #max
@@ -279,6 +285,14 @@ def findPoints(request):
             valuesTested.append({'x': float(intersection[0]), 'y': float(intersection[1]), 'result': float(result), 'isValid': False})
             continue
 
+        if isPossible:
+            minAxisX = min(minAxisX,float(intersection[0]))
+            maxAxisX = max(maxAxisX, float(intersection[0]))
+
+            minAxisY = min(minAxisY, float(intersection[1]))
+            maxAxisY = max(maxAxisY, float(intersection[1]))
+
+
         if result > maxResult and maxResult != INFINITE_RESULT:
             maxResult = result
             maxResultX = intersection[0]
@@ -290,6 +304,13 @@ def findPoints(request):
 
         valuesTested.append({'x': float(intersection[0]), 'y': float(intersection[1]), 'result': float(result), 'isValid': isPossible})
 
+    axisRange = {
+        'minX': float(os.getenv("DEFAULT_MIN_RANGE", "-100")) if minAxisX == sys.maxsize or minAxisX == -sys.maxsize else minAxisX,
+        'maxX': float(os.getenv("DEFAULT_MAX_RANGE", "100")) if maxAxisX == sys.maxsize or maxAxisX == -sys.maxsize else maxAxisX,
+        'minY': float(os.getenv("DEFAULT_MIN_RANGE", "-100")) if minAxisY == sys.maxsize or minAxisY == -sys.maxsize else minAxisY,
+        'maxY': float(os.getenv("DEFAULT_MAX_RANGE", "100")) if maxAxisY == sys.maxsize or maxAxisY == -sys.maxsize else maxAxisY,
+    }
+
     response_data = {
         'points': points,
         'intersections': intersections,
@@ -299,7 +320,8 @@ def findPoints(request):
         'maxResultY': float(maxResultY) if maxResultY != -sys.maxsize else None,
         'minResult': float(minResult) if minResult != sys.maxsize and minResult != -sys.maxsize else None,
         'minResultX': float(minResultX) if minResultX != sys.maxsize and minResultX != -sys.maxsize else None,
-        'minResultY': float(minResultY) if minResultY != sys.maxsize and minResultY != -sys.maxsize else None
+        'minResultY': float(minResultY) if minResultY != sys.maxsize and minResultY != -sys.maxsize else None,
+        'axisRange': axisRange
     }
 
     return JsonResponse(response_data, safe=False)
