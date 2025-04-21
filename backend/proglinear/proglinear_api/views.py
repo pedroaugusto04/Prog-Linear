@@ -134,7 +134,7 @@ def findPoints(request):
             if not valid:
                 intersection[2] = False
 
-    # verifica o limite inferior superior de cada variavel ( verificar casos de borda - 0 ou infinito )
+    # verifica o limite inferior e superior de cada variavel ( verificar casos de borda - 0 ou infinito )
     limInfX = 0
     limSupX = sys.maxsize
     limInfY = 0
@@ -251,7 +251,7 @@ def findPoints(request):
     minResultX = -sys.maxsize
     minResultY = -sys.maxsize
 
-
+    # verfiica se nao tem restricao superior ( resultado maximo infinito )
     if limSupX == sys.maxsize or limSupY == sys.maxsize:
         #max
         maxResult = INFINITE_RESULT # indica que o maior valor pode ser infinito
@@ -260,12 +260,6 @@ def findPoints(request):
 
         valuesTested.append({'x': float(INFINITE_RESULT if limSupX == sys.maxsize else float(limSupX)),
                                          'y': float(INFINITE_RESULT if limSupY == sys.maxsize else float(limSupY)), 'result': float(INFINITE_RESULT), 'isValid': isPossible})
-        #min
-        result = funcaoOtimiza.subs({x: limInfX, y: limInfY})
-        minResult = result
-        minResultX = limInfX
-        minResultY = limInfY
-        valuesTested.append({'x': float(limInfX), 'y': float(limInfY), 'result': float(result), 'isValid': isPossible})
 
     # percorre as intersecoes ( metodo grafico )
     for intersection in intersections:
