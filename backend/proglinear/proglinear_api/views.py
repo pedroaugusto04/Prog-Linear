@@ -100,6 +100,8 @@ def findPoints(request):
                 equations.append(Eq(var, solution[var]))
 
         if lista[0] != 0: # x != 0
+            if not solution: continue
+
             x_expr = solution[x]
             y1 = float(os.getenv("MIN_VAR", "-100")) # first point
             y2 = float(os.getenv("MAX_VAR", "100")) # second point
@@ -108,6 +110,8 @@ def findPoints(request):
             x2 = float(x_expr.subs(y,y2))
             points.append([x1, y1, x2, y2])
         else:
+            if not solution: continue
+
             y_expr = solution[y]
             x1 = float(os.getenv("MIN_VAR", "-100")) # first point
             x2 = float(os.getenv("MAX_VAR", "100")) # second point
@@ -155,75 +159,72 @@ def findPoints(request):
 
             solX = solve(resultX,y)
 
+            if solX == []:
+                if limInfX <= int(resultX.rhs) <= limSupX:
+                    limSupX = int(resultX.rhs)
+                    limInfX = int(resultX.rhs)
+                else:
+                    isPossible = False
+            else:
+                for i,cond in enumerate(solX.args):
+                    op = cond.rel_op
 
-            for i,cond in enumerate(solX.args):
-                op = cond.rel_op
+                    x = symbols('x')
 
-                x = symbols('x')
+                    if cond.rhs == x:
+                        valor = cond.lhs
 
-                if cond.rhs == x:
-                    valor = cond.lhs
+                        if valor in (oo, -oo): continue
 
-                    if valor in (oo, -oo): continue
+                        valor = valor.evalf()
+                        if op == "<":
+                            limInfX = max(limInfX, int(valor + 1))
+                        elif op == "<=":
+                            limInfX = max(limInfX, int(valor))
+                    elif cond.lhs == x:
+                        valor = cond.rhs
+                        if valor in (oo, -oo): continue
 
-                    valor = valor.evalf()
-                    if op == "==":
-                        if limInfX <= int(valor) <= limSupX:
-                            limSupX = int(valor)
-                            limInfX = int(valor)
-                        else:
-                            isPossible = False
-
-                elif cond.lhs == x:
-                    valor = cond.rhs
-                    if valor in (oo, -oo): continue
-
-                    valor = valor.evalf()
-                    if op == "<":
-                        limSupX = min(limSupX, int(valor - 1))
-                    elif op == "<=":
-                        limSupX = min(limSupX, int(valor))
-                    elif op == "==":
-                        if limInfX <= int(valor) <= limSupX:
-                            limSupX = int(valor)
-                            limInfX = int(valor)
-                        else:
-                            isPossible = False
+                        valor = valor.evalf()
+                        if op == "<":
+                            limSupX = min(limSupX, int(valor - 1))
+                        elif op == "<=":
+                            limSupX = min(limSupX, int(valor))
 
         if resultY != True and resultY != False:
             x = symbols('x')
 
             solY = solve(resultY,x)
 
-            for i, cond in enumerate(solY.args):
-                op = cond.rel_op
-                if cond.rhs == y:
-                    valor = cond.lhs
-                    if valor in (oo, -oo): continue
+            if solY == []:
+                if limInfY <= int(resultY.rhs) <= limSupY:
+                    limInfY = int(resultY.rhs)
+                    limSupY = int(resultY.rhs)
+                else:
+                    isPossible = False
 
-                    valor = valor.evalf()
-                    if op == "==":
-                        if limInfY <= int(valor) <= limSupY:
-                            limInfY = int(valor)
-                            limSupY = int(valor)
-                        else:
-                            isPossible = False
+            else:
+                for i, cond in enumerate(solY.args):
+                    op = cond.rel_op
 
-                elif cond.lhs == y:
-                    valor = cond.rhs
-                    if valor in (oo, -oo): continue
+                    if cond.rhs == y:
+                        valor = cond.lhs
+                        if valor in (oo, -oo): continue
 
-                    valor = valor.evalf()
-                    if op == "<":
-                        limSupY = min(limSupY, int(valor - 1))
-                    elif op == "<=":
-                        limSupY = min(limSupY, int(valor))
-                    elif op == "==":
-                        if limInfY <= int(valor) <= limSupY:
-                            limInfY = int(valor)
-                            limSupY = int(valor)
-                        else:
-                            isPossible = False
+                        valor = valor.evalf()
+                        if op == "<":
+                            limInfY = max(limInfY, int(valor + 1))
+                        elif op == "<=":
+                            limInfY = max(limInfY, int(valor))
+                    elif cond.lhs == y:
+                        valor = cond.rhs
+                        if valor in (oo, -oo): continue
+
+                        valor = valor.evalf()
+                        if op == "<":
+                            limSupY = min(limSupY, int(valor - 1))
+                        elif op == "<=":
+                            limSupY = min(limSupY, int(valor))
 
 
     # recupera funcao que o usuario deseja otimizar
@@ -252,7 +253,7 @@ def findPoints(request):
     minResultY = -sys.maxsize
 
     # verfiica se nao tem restricao superior ( resultado maximo infinito )
-    if limSupX == sys.maxsize or limSupY == sys.maxsize:
+    if (limSupX == sys.maxsize or limSupY == sys.maxsize) and isPossible:
         #max
         maxResult = INFINITE_RESULT # indica que o maior valor pode ser infinito
         maxResultX = INFINITE_RESULT if limSupX == sys.maxsize else float(limSupX)
@@ -260,6 +261,15 @@ def findPoints(request):
 
         valuesTested.append({'x': float(INFINITE_RESULT if limSupX == sys.maxsize else float(limSupX)),
                                          'y': float(INFINITE_RESULT if limSupY == sys.maxsize else float(limSupY)), 'result': float(INFINITE_RESULT), 'isValid': isPossible})
+
+    # verfiica se nao tem restricao inferior
+    if (limInfX == 0  or limInfY == 0) and isPossible:
+        # min
+        minResult = funcaoOtimiza.subs({x: limInfX,y: limInfY})
+        minResultX = limInfX
+        minResultY = limInfY
+
+        valuesTested.append({'x': float(limInfX),'y': float(limInfY),'result': float(minResult), 'isValid': isPossible})
 
     # percorre as intersecoes ( metodo grafico )
     for intersection in intersections:
