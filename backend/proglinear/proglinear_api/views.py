@@ -249,11 +249,14 @@ def findPoints(request):
     # verfiica se nao tem restricao superior ( resultado maximo infinito )
     if (limSupX == sys.maxsize or limSupY == sys.maxsize) and isPossible:
         #max
-        maxResult = INFINITE_RESULT # indica que o maior valor pode ser infinito
-        maxResultX = INFINITE_RESULT if limSupX == sys.maxsize else float(limSupX)
-        maxResultY = INFINITE_RESULT if limSupY == sys.maxsize else float(limSupY)
+        result = funcaoOtimiza.subs({x: limSupX,y: limSupY})
 
-        valuesTested.append({'x': float(INFINITE_RESULT if limSupX == sys.maxsize else float(limSupX)),
+        if result >= sys.maxsize:
+            maxResult =  INFINITE_RESULT # indica que o maior valor pode ser infinito
+            maxResultX = INFINITE_RESULT if limSupX == sys.maxsize else float(limSupX)
+            maxResultY = INFINITE_RESULT if limSupY == sys.maxsize else float(limSupY)
+
+            valuesTested.append({'x': float(INFINITE_RESULT if limSupX == sys.maxsize else float(limSupX)),
                                          'y': float(INFINITE_RESULT if limSupY == sys.maxsize else float(limSupY)), 'result': float(INFINITE_RESULT), 'isValid': isPossible})
 
     # verfiica se nao tem restricao inferior
