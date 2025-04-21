@@ -155,7 +155,7 @@ def findPoints(request):
             solX = solve(resultX,y)
 
             if solX == []:
-                if limInfX <= int(resultX.rhs) <= limSupX:
+                if (limInfX != limInfY) or (limInfX == resultX.rhs):
                     limSupX = int(resultX.rhs)
                     limInfX = int(resultX.rhs)
                 else:
@@ -192,7 +192,7 @@ def findPoints(request):
             solY = solve(resultY,x)
 
             if solY == []:
-                if limInfY <= int(resultY.rhs) <= limSupY:
+                if (limInfY != limSupY) or (limInfY == resultY.rhs):
                     limInfY = int(resultY.rhs)
                     limSupY = int(resultY.rhs)
                 else:
@@ -247,7 +247,7 @@ def findPoints(request):
     maxAxisY = -sys.maxsize
 
     # verfiica se nao tem restricao superior ( resultado maximo infinito )
-    if (limSupX == sys.maxsize or limSupY == sys.maxsize) and isPossible and maxResultX >= 0 and maxResultY >= 0:
+    if (limSupX == sys.maxsize or limSupY == sys.maxsize) and isPossible:
         #max
         maxResult = INFINITE_RESULT # indica que o maior valor pode ser infinito
         maxResultX = INFINITE_RESULT if limSupX == sys.maxsize else float(limSupX)
@@ -257,11 +257,15 @@ def findPoints(request):
                                          'y': float(INFINITE_RESULT if limSupY == sys.maxsize else float(limSupY)), 'result': float(INFINITE_RESULT), 'isValid': isPossible})
 
     # verfiica se nao tem restricao inferior
-    if (limInfX == 0  or limInfY == 0) and isPossible and minResultX >= 0 and minResultY >= 0:
+    if (limInfX == 0  or limInfY == 0) and isPossible:
         # min
         minResult = funcaoOtimiza.subs({x: limInfX,y: limInfY})
         minResultX = limInfX
         minResultY = limInfY
+
+        maxResult = funcaoOtimiza.subs({x: limInfX, y: limInfY})
+        maxResultX = limInfX
+        maxResultY = limInfY
 
         valuesTested.append({'x': float(limInfX),'y': float(limInfY),'result': float(minResult), 'isValid': isPossible})
 
