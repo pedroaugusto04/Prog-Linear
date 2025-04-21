@@ -34,6 +34,7 @@ export class AppComponent {
 
   points: number[][] = [];
   intersections: number[][] = [];
+  axisRange: any;
   valuesTested: Calculation[] = [];
 
   maxResult: number = -1
@@ -204,6 +205,7 @@ export class AppComponent {
         this.points = data.points;
         this.intersections = data.intersections;
         this.valuesTested = data.valuesTested;
+        this.axisRange = data.axisRange;
 
         this.maxResult = -1;
         this.maxResultX = -1;

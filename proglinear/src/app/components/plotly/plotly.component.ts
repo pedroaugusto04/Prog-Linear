@@ -18,6 +18,7 @@ export class PlotlyComponent implements OnChanges, OnInit {
   
   @Input() points: number[][] = [];
   @Input() intersections: number[][] = [];
+  @Input() axisRange!: any;
 
   isMobile: boolean = false;
 
@@ -47,13 +48,19 @@ export class PlotlyComponent implements OnChanges, OnInit {
       title: { text: 'Resultados: Método Gráfico' },
       xaxis: {
         title: 'x',
-        autorange: true
+        autorange: false,
+        autoscale: false
       },
       yaxis: {
         title: 'y',
-        autorange: true
+        autorange: false,
+        autoscale: false
       },
     }
+  };
+
+  public graphConfig = {
+    modeBarButtonsToRemove: ['autoScale2d']
   };
 
   ngOnChanges(changes: SimpleChanges) {
@@ -66,6 +73,10 @@ export class PlotlyComponent implements OnChanges, OnInit {
 
     if (changes['intersections']) {
       this.gerarIntersecoes();
+    }
+
+    if (changes['axisRange']) {
+      this.updateRange();
     }
   }
 
@@ -118,6 +129,26 @@ export class PlotlyComponent implements OnChanges, OnInit {
     }
 
     this.graph.data = this.graph.data.filter(trace => Object.keys(trace).length > 0);
+  }
+
+  updateRange() {
+    if (!this.axisRange) return;
+
+    console.log(this.axisRange);
+
+    this.graph.layout = {
+      ...this.graph.layout,
+      xaxis: {
+        ...this.graph.layout.xaxis,
+        range: [this.axisRange.minX - 10,this.axisRange.maxX + 10]
+      },
+      yaxis: {
+        ...this.graph.layout.yaxis,
+        range: [this.axisRange.minY - 10,this.axisRange.maxY + 10]
+      },
+    };
+
+    console.log(this.graph.layout);
   }
   
 }

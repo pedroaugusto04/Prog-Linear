@@ -78,7 +78,7 @@
       <button id = "submit-button" type="button" (click)="onSubmit()">Calcular</button>
     </div>
     <div class = "plotly-graph">
-      <app-plotly [points]="points" [intersections]="intersections" class="graph"></app-plotly>
+      <app-plotly [points]="points" [intersections]="intersections" [axisRange]="axisRange" class="graph"></app-plotly>
     </div>
     <div class = "results">
       <button id = "see-results-button" type="button" (click)="openResultsModal()">Ver Detalhes</button>
