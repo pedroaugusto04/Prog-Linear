@@ -247,7 +247,7 @@ def findPoints(request):
     maxAxisY = -sys.maxsize
 
     # verfiica se nao tem restricao superior ( resultado maximo infinito )
-    if (limSupX == sys.maxsize or limSupY == sys.maxsize) and isPossible:
+    if (limSupX == sys.maxsize or limSupY == sys.maxsize) and isPossible and maxResultX >= 0 and maxResultY >= 0:
         #max
         maxResult = INFINITE_RESULT # indica que o maior valor pode ser infinito
         maxResultX = INFINITE_RESULT if limSupX == sys.maxsize else float(limSupX)
@@ -257,7 +257,7 @@ def findPoints(request):
                                          'y': float(INFINITE_RESULT if limSupY == sys.maxsize else float(limSupY)), 'result': float(INFINITE_RESULT), 'isValid': isPossible})
 
     # verfiica se nao tem restricao inferior
-    if (limInfX == 0  or limInfY == 0) and isPossible:
+    if (limInfX == 0  or limInfY == 0) and isPossible and minResultX >= 0 and minResultY >= 0:
         # min
         minResult = funcaoOtimiza.subs({x: limInfX,y: limInfY})
         minResultX = limInfX
