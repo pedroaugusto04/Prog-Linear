@@ -19,7 +19,6 @@ def ping(request):
 
 @api_view(['POST'])
 def findPoints(request):
-    INFINITE_RESULT = -2
     equacoes_str = request.data.get("equacoes", [])
 
     num_colunas = len(equacoes_str[0])
@@ -133,82 +132,6 @@ def findPoints(request):
             if not valid:
                 intersection[2] = False
 
-    # verifica o limite inferior e superior de cada variavel ( verificar casos de borda - 0 ou infinito )
-    limInfX = 0
-    limSupX = sys.maxsize
-    limInfY = 0
-    limSupY = sys.maxsize
-    isPossible = True # verifica se nao tem contradicao, do tipo, x = 5 e x = 4
-
-    for inequation in inequations:
-
-        valueX = {y: 0}
-
-        resultX = inequation.subs(valueX)
-
-        valueY = {x: 0}
-
-        resultY = inequation.subs(valueY)
-
-        if resultX != True and resultX != False:
-            y = symbols('y')
-
-            solX = solve(resultX,y)
-
-            if solX != []:
-                for i,cond in enumerate(solX.args):
-                    op = cond.rel_op
-
-                    x = symbols('x')
-
-                    if cond.rhs == x:
-                        valor = cond.lhs
-
-                        if valor in (oo, -oo): continue
-
-                        valor = valor.evalf()
-                        if op == "<":
-                            limInfX = max(limInfX, int(valor + 1))
-                        elif op == "<=":
-                            limInfX = max(limInfX, int(valor))
-                    elif cond.lhs == x:
-                        valor = cond.rhs
-                        if valor in (oo, -oo): continue
-
-                        valor = valor.evalf()
-                        if op == "<":
-                            limSupX = min(limSupX, int(valor - 1))
-                        elif op == "<=":
-                            limSupX = min(limSupX, int(valor))
-
-        if resultY != True and resultY != False:
-            x = symbols('x')
-
-            solY = solve(resultY,x)
-
-            if solY != []:
-                for i, cond in enumerate(solY.args):
-                    op = cond.rel_op
-
-                    if cond.rhs == y:
-                        valor = cond.lhs
-                        if valor in (oo, -oo): continue
-
-                        valor = valor.evalf()
-                        if op == "<":
-                            limInfY = max(limInfY, int(valor + 1))
-                        elif op == "<=":
-                            limInfY = max(limInfY, int(valor))
-                    elif cond.lhs == y:
-                        valor = cond.rhs
-                        if valor in (oo, -oo): continue
-
-                        valor = valor.evalf()
-                        if op == "<":
-                            limSupY = min(limSupY, int(valor - 1))
-                        elif op == "<=":
-                            limSupY = min(limSupY, int(valor))
-
 
     # recupera funcao que o usuario deseja otimizar
     listaFuncaoOtimiza = equacoes_map[0]
@@ -234,31 +157,6 @@ def findPoints(request):
     minAxisY = sys.maxsize
     maxAxisY = -sys.maxsize
 
-    # verfiica se nao tem restricao superior ( resultado maximo infinito )
-    if (limSupX == sys.maxsize or limSupY == sys.maxsize) and isPossible:
-        #max
-        result = funcaoOtimiza.subs({x: limSupX,y: limSupY})
-
-        if result >= sys.maxsize:
-            maxResult =  INFINITE_RESULT # indica que o maior valor pode ser infinito
-            maxResultX = INFINITE_RESULT if limSupX == sys.maxsize else float(limSupX)
-            maxResultY = INFINITE_RESULT if limSupY == sys.maxsize else float(limSupY)
-
-            valuesTested.append({'x': float(INFINITE_RESULT if limSupX == sys.maxsize else float(limSupX)),
-                                         'y': float(INFINITE_RESULT if limSupY == sys.maxsize else float(limSupY)), 'result': float(INFINITE_RESULT), 'isValid': isPossible})
-
-    # verfiica se nao tem restricao inferior
-    if (limInfX == 0  or limInfY == 0) and isPossible:
-        # min
-        minResult = funcaoOtimiza.subs({x: limInfX,y: limInfY})
-        minResultX = limInfX
-        minResultY = limInfY
-
-        maxResult = funcaoOtimiza.subs({x: limInfX, y: limInfY})
-        maxResultX = limInfX
-        maxResultY = limInfY
-
-        valuesTested.append({'x': float(limInfX),'y': float(limInfY),'result': float(minResult), 'isValid': isPossible})
 
     # percorre as intersecoes ( metodo grafico )
     for intersection in intersections:
@@ -268,15 +166,14 @@ def findPoints(request):
             valuesTested.append({'x': float(intersection[0]), 'y': float(intersection[1]), 'result': float(result), 'isValid': False})
             continue
 
-        if isPossible:
-            minAxisX = min(minAxisX,float(intersection[0]))
-            maxAxisX = max(maxAxisX, float(intersection[0]))
+        minAxisX = min(minAxisX,float(intersection[0]))
+        maxAxisX = max(maxAxisX, float(intersection[0]))
 
-            minAxisY = min(minAxisY, float(intersection[1]))
-            maxAxisY = max(maxAxisY, float(intersection[1]))
+        minAxisY = min(minAxisY, float(intersection[1]))
+        maxAxisY = max(maxAxisY, float(intersection[1]))
 
 
-        if result > maxResult and maxResult != INFINITE_RESULT:
+        if result > maxResult:
             maxResult = result
             maxResultX = intersection[0]
             maxResultY = intersection[1]
@@ -285,7 +182,7 @@ def findPoints(request):
             minResultX = intersection[0]
             minResultY = intersection[1]
 
-        valuesTested.append({'x': float(intersection[0]), 'y': float(intersection[1]), 'result': float(result), 'isValid': isPossible})
+        valuesTested.append({'x': float(intersection[0]), 'y': float(intersection[1]), 'result': float(result), 'isValid': True})
 
     axisRange = {
         'minX': float(os.getenv("DEFAULT_MIN_RANGE", "-100")) if minAxisX == sys.maxsize or minAxisX == -sys.maxsize else minAxisX,
