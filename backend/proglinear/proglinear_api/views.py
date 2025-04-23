@@ -139,6 +139,7 @@ def findPoints(request):
     limInfY = 0
     limSupY = sys.maxsize
     isPossible = True # verifica se nao tem contradicao, do tipo, x = 5 e x = 4
+
     for inequation in inequations:
 
         valueX = {y: 0}
@@ -154,13 +155,7 @@ def findPoints(request):
 
             solX = solve(resultX,y)
 
-            if solX == []:
-                if (limInfX != limInfY) or (limInfX == resultX.rhs):
-                    limSupX = int(resultX.rhs)
-                    limInfX = int(resultX.rhs)
-                else:
-                    isPossible = False
-            else:
+            if solX != []:
                 for i,cond in enumerate(solX.args):
                     op = cond.rel_op
 
@@ -191,14 +186,7 @@ def findPoints(request):
 
             solY = solve(resultY,x)
 
-            if solY == []:
-                if (limInfY != limSupY) or (limInfY == resultY.rhs):
-                    limInfY = int(resultY.rhs)
-                    limSupY = int(resultY.rhs)
-                else:
-                    isPossible = False
-
-            else:
+            if solY != []:
                 for i, cond in enumerate(solY.args):
                     op = cond.rel_op
 
