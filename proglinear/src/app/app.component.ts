@@ -11,11 +11,12 @@ import { Calculation } from './models/Calculation';
 import { CommonModule } from '@angular/common';
 import { ResultsModalService } from './components/results-modal/services/results-modal.service';
 import { Restriction } from './models/Restriction';
+import {MatTooltipModule} from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-root',
   imports: [PlotlyComponent,ReactiveFormsModule,MatFormFieldModule, MatInputModule, MatIconModule, MatMenuModule, PlotlyComponent,
-    MatSnackBarModule,CommonModule
+    MatSnackBarModule,CommonModule,MatTooltipModule
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
@@ -26,11 +27,9 @@ export class AppComponent {
   restrictionsForm: FormGroup;
   restrictions: Restriction[] = [];
 
-  xCoef: number[] = [];
-  yCoef: number[] = [];
-  constCoef: number[] = [];
-  op1Coef: string[] = [];
-  op2Coef: string[] = [];
+  varCoef: number[][] = [];
+  constCoef: number[][] = [];
+  opCoef: string[][] = [];
   op1Options: string[] = ["+","-"];
   op2Options: string[] = ["==",">","<",">=","<="];
 
@@ -68,7 +67,7 @@ export class AppComponent {
       id: 0,
       variables: [0,0], 
       constant: 0,
-      coefficients: ["+","="] 
+      coefficients: ["+","+"] 
     };
 
     const restriction2: Restriction = {
@@ -175,50 +174,61 @@ export class AppComponent {
   }
 
   onSubmit() {
-    this.xCoef = [];
-    this.yCoef = [];
+    this.varCoef = [];
     this.constCoef = [];
-    this.op1Coef = [];
-    this.op2Coef = [];
+    this.opCoef = [];
+
+    this.constCoef[0] = [];
+    this.opCoef[0] = [];
 
     const filteredX = Object.entries(this.restrictionsForm.value)
-    .filter(([key, value]) => key.startsWith('x1_'))  
-    .map(([key, value]) => Number(value));
+    .filter(([key, value]) => key.startsWith('x') && /\d+/.test(key))
+    .map(([key, value]) => ({ key, value: Number(value) }))
+    .sort((a, b) => {
+      const opA = parseInt(a.key.match(/op(\d+)/)?.[1] || '0');
+      const opB = parseInt(b.key.match(/op(\d+)/)?.[1] || '0');
+      return opA - opB;
+    });
 
-    this.xCoef.push(...filteredX);
 
-    const filteredY = Object.entries(this.restrictionsForm.value)
-    .filter(([key, value]) => key.startsWith('x2_'))  
-    .map(([key, value]) => Number(value));
+    filteredX.forEach(({ key, value }) => {
 
-    this.yCoef.push(...filteredY);
+    const coefIndex = parseInt(key.match(/\d+/)?.[0] || '0') - 1;  
+
+    if (!this.varCoef[coefIndex]) {
+      this.varCoef[coefIndex] = [];
+    }
+
+    this.varCoef[coefIndex].push(value);
+    });
 
     const filteredC = Object.entries(this.restrictionsForm.value)
     .filter(([key, value]) => key.startsWith('const_'))  
     .map(([key, value]) => Number(value));
 
-    this.constCoef.push(...filteredC);
+    this.constCoef[0].push(...filteredC);
 
-    const filteredOp1 = Object.entries(this.restrictionsForm.value)
-    .filter(([key, value]) => key.startsWith('op1Coef_'))  
-    .map(([key, value]) => String(value));
+    const filteredOp = Object.entries(this.restrictionsForm.value)
+    .filter(([key, value]) => key.startsWith('op') && /\d+/.test(key))  
+    .map(([key, value]) => ({ key, value: String(value) }));
 
-    this.op1Coef.push(...filteredOp1);
+    filteredOp.forEach(({ key, value }) => {
 
-    const filteredOp2 = Object.entries(this.restrictionsForm.value)
-    .filter(([key, value]) => key.startsWith('op2Coef_'))  
-    .map(([key, value]) => String(value));
+      const coefIndex = parseInt(key.match(/_(\d+)/)?.[1] || '0');  
 
-    this.op2Coef.push(...filteredOp2);
+      if (!this.opCoef[coefIndex]) {
+        this.opCoef[coefIndex] = [];
+      }
+
+      this.opCoef[coefIndex].push(value);
+    });
 
 
-    const equations: string[][] | number[][] = [];
+    const equations: number[][][] | string[][][] = [];
 
-    equations[0] = this.xCoef;
-    equations[1] = this.yCoef;
-    equations[2] = this.constCoef;
-    equations[3] = this.op1Coef;
-    equations[4] = this.op2Coef;
+    equations[0] = this.varCoef;
+    equations[1] = this.constCoef;
+    equations[2] = this.opCoef;
 
     this.sympyService.findPoints(equations).subscribe({
       next: (data) => {
@@ -262,30 +272,40 @@ export class AppComponent {
   }
 
   addNewVariableToRestriction(index: number) {
-    let count = 0;
 
-    Object.keys(this.restrictionsForm.controls).forEach(control => {
-      // expressao regular para contar quantas variaveis ja existem na linha clicada
-      if (new RegExp(`^x\\d+_${index}$`).test(control)) {
-        count++;
-      }
-    });
+    let count = this.restrictions[index].variables.length + 1;
 
-    const newVarName = `x${count + 1}_${index}`;
+    this.restrictionsForm.addControl(`x${count}_${index}`, this.fb.control(0));
+    
+    const currentStr: string = this.restrictionsForm.get(`op${count-1}Coef_${index}`)?.value;
 
-    this.restrictions[index] = { ...this.restrictions[index], [newVarName]: 0 };
+    this.restrictionsForm.removeControl(`op${count-1}Coef_${index}`);
 
-    this.restrictionsForm.addControl(newVarName, this.fb.control(0));
+    this.restrictionsForm.addControl(`op${count-1}Coef_${index}`,this.fb.control("+"));
 
+    this.restrictionsForm.addControl(`op${count}Coef_${index}`,this.fb.control(currentStr));
+
+    this.restrictions[index].variables.push(0);
+
+    this.restrictions[index].coefficients.splice(this.restrictions[index].coefficients.length - 1, 0, "+");
+  }
+
+  removeRestrictionVariable(index: number){
+    const count = this.restrictions[index].variables.length;
+
+    this.restrictionsForm.removeControl(`x${count}_${index}`);
+
+    this.restrictionsForm.removeControl(`op${count-1}_${index}`);
+
+    this.restrictions[index].variables.pop();
+
+    this.restrictions[index].coefficients.splice(this.restrictions[index].coefficients.length -2,1);
   }
       
 
-  setOp1Coef(index: number, value: string): void {
-    this.restrictionsForm.get('op1Coef_' + index)?.setValue(value);
-  }
-
-  setOp2Coef(index: number, value: string): void {
-    this.restrictionsForm.get('op2Coef_' + index)?.setValue(value);
+  setOpCoef(index: number, indexJ: number, value: string): void {
+    indexJ++;
+    this.restrictionsForm.get(`op${indexJ}Coef_` + index)?.setValue(value);
   }
 
   openResultsModal() {

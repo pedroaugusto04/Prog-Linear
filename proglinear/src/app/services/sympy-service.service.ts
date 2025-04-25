@@ -10,7 +10,7 @@ export class SympyServiceService {
 
   constructor(private http: HttpClient) { }
 
-  findPoints(equacoes: string[][] | number[][]): Observable<any> {
+  findPoints(equacoes: number[][][] | string[][][]): Observable<any> {
     
     const payload = { equacoes };  
     
