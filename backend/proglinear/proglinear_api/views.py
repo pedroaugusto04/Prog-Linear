@@ -55,13 +55,13 @@ def findPoints(request):
 
         lista = equacoes_map[i]
 
-        x,y = symbols('x y')
+        vars = symbols(f'x1:{len(lista)-2}')
 
-        resultX = lista[0] * x
-        resultY = lista[1] * y
+        lhs = 0
+        for index,var in enumerate(vars):
+            lhs += lista[index] * var
 
-        lhs = resultX + resultY
-        rhs = lista[2]
+        rhs = lista[len(lista)-3]
 
         op2 = lista[4]
 
@@ -76,17 +76,17 @@ def findPoints(request):
         elif op2 == '>':
             inequations.append(Gt(lhs, rhs))
 
-    # verifica 2 pontos para cada equacao
+    # verifica 2 pontos para cada equacao ( no caso de ate 2 variaveis )
 
     for i in equacoes_map.keys():
         lista = equacoes_map[i]
 
-        x, y = symbols('x y')
+        x1, x2 = symbols('x1 x2')
 
         A = Matrix([[lista[0],lista[1]]])
         b = Matrix([lista[2]])
 
-        solution = solve(A * Matrix([x, y]) - b, (x, y))
+        solution = solve(A * Matrix([x1, x2]) - b, (x1, x2))
 
 
         if i != 0:
@@ -96,36 +96,36 @@ def findPoints(request):
         if lista[0] != 0: # x != 0
             if not solution: continue
 
-            x_expr = solution[x]
-            y1 = float(os.getenv("MIN_VAR", "-100")) # first point
-            y2 = float(os.getenv("MAX_VAR", "100")) # second point
+            x_expr = solution[x1]
+            y1v = float(os.getenv("MIN_VAR", "-100")) # first point
+            y2v = float(os.getenv("MAX_VAR", "100")) # second point
 
-            x1 = float(x_expr.subs(y, y1))
-            x2 = float(x_expr.subs(y,y2))
-            points.append([x1, y1, x2, y2])
+            x1v = float(x_expr.subs(x2, y1v))
+            x2v = float(x_expr.subs(x2,y2v))
+            points.append([x1v, y1v, x2v, y2v])
         else:
             if not solution: continue
 
-            y_expr = solution[y]
-            x1 = float(os.getenv("MIN_VAR", "-100")) # first point
-            x2 = float(os.getenv("MAX_VAR", "100")) # second point
+            y_expr = solution[x2]
+            x1v = float(os.getenv("MIN_VAR", "-100")) # first point
+            x2v = float(os.getenv("MAX_VAR", "100")) # second point
 
-            y1 = float(y_expr.subs(x,x1))
-            y2 = float(y_expr.subs(x, x2))
-            points.append([x1, y1, x2, y2])
+            y1v = float(y_expr.subs(x1,x1v))
+            y2v = float(y_expr.subs(x1, x2v))
+            points.append([x1v, y1v, x2v, y2v])
 
     for i in range(len(equations)):
         for j in range(i + 1, len(equations)):
             if equations[i] == equations[j]: continue
-            sol = solve((equations[i], equations[j]), (x, y))
+            sol = solve((equations[i], equations[j]), (x1, x2))
             if sol:
-                intersections.append([float(sol[x]), float(sol[y]),True])
+                intersections.append([float(sol[x1]), float(sol[x2]),True])
 
 
     # verifica quais intersecoes sao validas ( respeitam as inequacoes e quais nao )
     for inequation in inequations:
         for intersection in intersections:
-            value = {x: intersection[0],y: intersection[1]}
+            value = {x1: intersection[0],x2: intersection[1]}
 
             valid = inequation.subs(value)
 
@@ -135,13 +135,13 @@ def findPoints(request):
 
     # recupera funcao que o usuario deseja otimizar
     listaFuncaoOtimiza = equacoes_map[0]
-    x, y = symbols("x y")
 
-    resultX = listaFuncaoOtimiza[0] * x
-    resultY = listaFuncaoOtimiza[1] * y
-    resultZ = listaFuncaoOtimiza[2]
+    vars = symbols(f'x1:{len(listaFuncaoOtimiza)-2}')
 
-    funcaoOtimiza = resultX + resultY + resultZ
+    funcaoOtimiza = 0
+
+    for index,var in enumerate(vars):
+        funcaoOtimiza += listaFuncaoOtimiza[index] * var
 
     maxResult = -sys.maxsize
     maxResultX = -sys.maxsize
@@ -160,7 +160,7 @@ def findPoints(request):
 
     # percorre as intersecoes ( metodo grafico )
     for intersection in intersections:
-        result = funcaoOtimiza.subs({x: intersection[0], y: intersection[1]})
+        result = funcaoOtimiza.subs({x1: intersection[0], x2: intersection[1]})
 
         if not intersection[2]:
             valuesTested.append({'x': float(intersection[0]), 'y': float(intersection[1]), 'result': float(result), 'isValid': False})
