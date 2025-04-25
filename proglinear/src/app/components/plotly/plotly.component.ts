@@ -134,8 +134,6 @@ export class PlotlyComponent implements OnChanges, OnInit {
   updateRange() {
     if (!this.axisRange) return;
 
-    console.log(this.axisRange);
-
     this.graph.layout = {
       ...this.graph.layout,
       xaxis: {
@@ -147,8 +145,6 @@ export class PlotlyComponent implements OnChanges, OnInit {
         range: [this.axisRange.minY - 10,this.axisRange.maxY + 10]
       },
     };
-
-    console.log(this.graph.layout);
   }
   
 }

@@ -63,7 +63,7 @@ mat-form-field {
     overflow-x: hidden;
 }
 
-.restrition-inputs {
+.restriction-inputs {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -100,6 +100,10 @@ button {
 }
 
 #add-button {
+    background-color: #4A90E2;
+}
+
+#add-var-button {
     background-color: #4A90E2;
 }
 

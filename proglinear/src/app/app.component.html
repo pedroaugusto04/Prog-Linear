@@ -3,73 +3,72 @@
       <p>Calculadora - Problemas de Otimização com 2 variáveis </p>
     </div>
     <div class="inputs">
-      <form [formGroup]="restritionsForm">
+      <form [formGroup]="restrictionsForm">
         <div class = "content-inputs">
-            <div class = "restrition-inputs">
-                @for (restrition of restritions; track restrition; let i = $index){
+            <div class = "restriction-inputs">
+                @for (restriction of restrictions; track restriction.id; let i = $index){
                   @if (i == 0){
                     <h2>Função para otimização:</h2>
                   } @else if (i == 1){
                     <h2> Restrições: </h2>
                   }
                     <div class = "input" [id]="'input_' + i">
-                        <mat-form-field class = "field-coef" appearance="outline">
-                            <mat-label>X</mat-label>
-                            <input type="number" placeholder="0" matInput [formControlName]="'x_' + i">
+                      @for(variable of restriction.variables; track j; let j = $index){
+                        @if(j <= restriction.variables.length -1) {
+                          <mat-form-field class = "field-coef" appearance="outline">
+                            <mat-label>x{{ j + 1 }}</mat-label>
+                            <input type="number" placeholder="0" matInput [formControlName]="'x' + (j + 1) + '_' + restriction.id">
                           </mat-form-field>
-
+  
                           <button class = "op-button" mat-button [matMenuTriggerFor]="menuOp1">
-                            {{ restritionsForm.get('op1Coef_' + i)?.value }}
+                            {{restriction.coefficients[j]}}
                           </button> 
                           <mat-menu #menuOp1="matMenu">
                             <button mat-menu-item (click)="setOp1Coef(i, '+')">+</button>
                             <button mat-menu-item (click)="setOp1Coef(i, '-')">-</button>
                           </mat-menu>
-
-                          <mat-form-field class = "field-coef" appearance="outline">
-                          <mat-label>Y</mat-label>
-                          <input type="number" matInput placeholder="0" [formControlName]="'y_' + i">
-                          </mat-form-field>
-
-                          @if(i == 0){
-                            <button class = "op-button" mat-button [matMenuTriggerFor]="menuOp2">
-                              {{ restritionsForm.get('op2Coef_' + i)?.value }}
-                            </button> 
-                            <mat-menu #menuOp2="matMenu">
-                              <button mat-menu-item (click)="setOp2Coef(i, '+')">+</button>
-                              <button mat-menu-item (click)="setOp2Coef(i, '-')">-</button>
-                            </mat-menu>
-                          } @else {
-                            <button class = "op-button" mat-button [matMenuTriggerFor]="menuOp2">
-                              {{ restritionsForm.get('op2Coef_' + i)?.value }}
-                            </button> 
-                            <mat-menu #menuOp2="matMenu">
-                              <button mat-menu-item (click)="setOp2Coef(i, '=')">=</button>
-                              <button mat-menu-item (click)="setOp2Coef(i, '>')">></button>
-                              <button mat-menu-item (click)="setOp2Coef(i, '<')"><</button>
-                              <button mat-menu-item (click)="setOp2Coef(i, '<=')"><=</button>
-                              <button mat-menu-item (click)="setOp2Coef(i, '>=')">>=</button>
-                            </mat-menu>
-                          }
-                            
-                          <mat-form-field class = "field-coef" appearance="outline">
-                            <mat-label>C</mat-label>
-                            <input type="number" matInput placeholder="0" [formControlName]="'const_' + i">
-                            </mat-form-field>
-                            
-                        @if (i > 0){
-                          <button id = "add-button" mat-icon-button (click)="addRestrition()">
-                            <mat-icon>add</mat-icon> 
-                          </button>
                         }
+                      }
+
+                      @if(i == 0){
+                        <button class = "op-button" mat-button [matMenuTriggerFor]="menuOp2">
+                          {{ restrictionsForm.get('op2Coef_' + i)?.value }}
+                        </button> 
+                        <mat-menu #menuOp2="matMenu">
+                          <button mat-menu-item (click)="setOp2Coef(i, '+')">+</button>
+                          <button mat-menu-item (click)="setOp2Coef(i, '-')">-</button>
+                        </mat-menu>
+                      } @else {
+                        <button class = "op-button" mat-button [matMenuTriggerFor]="menuOp2">
+                          {{ restrictionsForm.get('op2Coef_' + i)?.value }}
+                        </button> 
+                        <mat-menu #menuOp2="matMenu">
+                          <button mat-menu-item (click)="setOp2Coef(i, '=')">=</button>
+                          <button mat-menu-item (click)="setOp2Coef(i, '>')">></button>
+                          <button mat-menu-item (click)="setOp2Coef(i, '<')"><</button>
+                          <button mat-menu-item (click)="setOp2Coef(i, '<=')"><=</button>
+                          <button mat-menu-item (click)="setOp2Coef(i, '>=')">>=</button>
+                        </mat-menu>
+                      }
+
+                      <mat-form-field class = "field-coef" appearance="outline">
+                        <mat-label>C</mat-label>
+                        <input type="number" matInput placeholder="0" [formControlName]="'const'+'_'+restriction.constant">
+                      </mat-form-field>
                         
-                        @if(i > 1){
-                            <button id = "delete-button" mat-icon-button (click)="removeRestrition(i)">
-                                <mat-icon>delete</mat-icon> 
-                            </button>
-                        }
-                    </div>
+                      @if (i > 0){
+                        <button id = "add-button" mat-icon-button (click)="addRestriction()">
+                          <mat-icon>add</mat-icon> 
+                        </button>
+                      }
                     
+                      @if(i > 1){
+                        <button id = "delete-button" mat-icon-button (click)="removeRestriction(i)">
+                          <mat-icon>delete</mat-icon> 
+                        </button>
+                      }
+                      
+                    </div>
                 }
             </div>
 
