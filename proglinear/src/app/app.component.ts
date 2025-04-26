@@ -38,10 +38,10 @@ export class AppComponent {
   axisRange: any;
   valuesTested: Calculation[] = [];
 
-  maxResult: number = -1
+  maxResult: number | string = -1
   maxResultX: number = -1
   maxResultY: number = -1
-  minResult: number = -1
+  minResult: number | string = -1
   minResultX: number = -1
   minResultY: number = -1
   maxXSimplex: number[] = []
@@ -281,7 +281,8 @@ export class AppComponent {
         if (data.minResultY !== null) this.minResultY = data.minResultY;
 
       },
-      error: () => {
+      error: (error) => {
+        console.log(error)
         this.snackBar.open("Erro ao processar. Verifique as variáveis inseridas", "X", {
           duration: 1000,
           verticalPosition: "top",

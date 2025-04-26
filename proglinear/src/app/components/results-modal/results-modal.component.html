@@ -7,8 +7,7 @@
     } 
     <p class = "calcs-text"
     [ngClass]="{ 'valid': value.isValid, 'invalid': !value.isValid }"
-    >x1: {{value.x === -2? 'Infinito': value.x}}, x2: {{value.y === -2? 'Infinito': value.y}}, Resultado: {{value.result === -2? 
-    'Infinito': value.result}}</p>
+    >x1: {{value.x}}, x2: {{value.y}}, Resultado: {{value.result}}</p>
 }
 
 <div mat-dialog-title class="dialog-title">

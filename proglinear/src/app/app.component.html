@@ -90,30 +90,9 @@
         <div class = "result">
           @if(maxResult != -1){
             <h2>Resultado maximização:</h2>
-            <h3>Maior valor: {{ maxResult === -2 ? 'Infinito' : maxResult }} </h3>
-            <h3>Encontrado para: x1 = {{maxResultX === -2? 'Infinito': maxResultX}}, x2 = {{maxResultY === -2? 'Infinito': maxResultY}} </h3>
-          } @else {
-            <h2>Não foram encontrados resultados para maximização</h2>
-          }
-        </div>
-  
-        <div class = "result">
-          @if(minResult != -1){
-            <h2>Resultado minimização:</h2>
-            <h3>Menor valor: {{minResult}}</h3>
-            <h3>Encontrado para: x1 = {{minResultX}}, x2 = {{minResultY}} </h3>
-          } @else {
-            <h2>Não foram encontrados resultados para minimização</h2>
-          }
-        </div>
-      } @else {
-        <div class = "result">
-          @if(maxResult != -1){
-            <h2>Resultado maximização:</h2>
-            <h3>Maior valor: {{maxResult}} </h3>
-            <h3>Encontrado para:</h3>
-            @for(x of maxXSimplex; track i; let i = $index) {
-              <h3>x{{ i + 1 }} = {{ x }}</h3>
+            <h3>Maior valor: {{ maxResult === 'Infinite' ? 'Infinito' : maxResult }} </h3>
+            @if (maxResult !== 'Infinite'){
+              <h3>Encontrado para: x1 = {{maxResultX}}, x2 = {{maxResultY}} </h3>
             }
           } @else {
             <h2>Não foram encontrados resultados para maximização</h2>
@@ -123,10 +102,39 @@
         <div class = "result">
           @if(minResult != -1){
             <h2>Resultado minimização:</h2>
-            <h3>Menor valor: {{minResult}}</h3>
-            <h3>Encontrado para:</h3>
-            @for(x of minXSimplex; track i; let i = $index) {
-              <h3>x{{ i + 1 }} = {{ x }}</h3>
+            <h3>Menor valor: {{ minResult === 'Infinite' ? '-Infinito' : minResult }} </h3>
+            @if (minResult !== 'Infinite'){
+              <h3>Encontrado para: x1 = {{minResultX}}, x2 = {{minResultY}} </h3>
+            }
+          } @else {
+            <h2>Não foram encontrados resultados para minimização</h2>
+          }
+        </div>
+      } @else {
+        <div class = "result">
+          @if(maxResult != -1){
+            <h2>Resultado maximização:</h2>
+            <h3>Maior valor: {{ maxResult === 'Infinite' ? 'Infinito' : maxResult }} </h3>
+            @if (maxResult !== 'Infinite'){
+              <h3>Encontrado para:</h3>
+              @for(x of maxXSimplex; track i; let i = $index) {
+                <h3>x{{ i + 1 }} = {{ x }}</h3>
+              }
+            }
+          } @else {
+            <h2>Não foram encontrados resultados para maximização</h2>
+          }
+        </div>
+  
+        <div class = "result">
+          @if(minResult != -1){
+            <h2>Resultado minimização:</h2>
+            <h3>Menor valor: {{ minResult === 'Infinite' ? '-Infinito' : minResult }} </h3>
+            @if (minResult !== 'Infinite'){
+              <h3>Encontrado para:</h3>
+              @for(x of minXSimplex; track i; let i = $index) {
+                <h3>x{{ i + 1 }} = {{ x }}</h3>
+              }
             }
           } @else {
             <h2>Não foram encontrados resultados para minimização</h2>
