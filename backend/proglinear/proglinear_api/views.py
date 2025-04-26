@@ -187,6 +187,8 @@ def findPoints(request):
 
         for index,var in enumerate(vars):
             funcaoOtimiza += listaFuncaoOtimiza[index] * var
+        funcaoOtimiza += equacoes_map[0][len(equacoes_map[0])-1]
+
 
     maxResult = -sys.maxsize
     maxResultX = -sys.maxsize
@@ -251,6 +253,10 @@ def findPoints(request):
 
         resultSimplexMaximization = linprog(C_simplex,A_ub=A_simplex, b_ub = B_simplex,
                                             A_eq=A_Eq_Simplex if A_Eq_Simplex else None,b_eq=B_Eq_Simplex if B_Eq_Simplex else None,method='simplex')
+
+
+        print(resultSimplexMaximization)
+        print(resultSimplexMinimization)
 
         if resultSimplexMaximization.status == 0:
             maxResult  = -resultSimplexMaximization.fun
