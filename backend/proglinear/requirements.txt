@@ -13,3 +13,4 @@ sqlparse==0.5.3
 sympy==1.13.3
 uvicorn==0.34.1
 whitenoise==6.9.0
+scipy==1.15.2
