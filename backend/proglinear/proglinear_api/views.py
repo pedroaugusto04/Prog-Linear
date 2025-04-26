@@ -243,12 +243,14 @@ def findPoints(request):
                 i_ub += 1
 
 
-        resultSimplexMinimization = linprog(C_simplex,A_ub=A_simplex, b_ub = B_simplex, A_eq=A_Eq_Simplex,b_eq=B_Eq_Simplex,method='simplex')
+        resultSimplexMinimization = linprog(C_simplex,A_ub=A_simplex, b_ub = B_simplex,
+                                            A_eq=A_Eq_Simplex if A_Eq_Simplex else None,b_eq=B_Eq_Simplex if B_Eq_Simplex else None,method='simplex')
 
         for index,value in enumerate(C_simplex):
             C_simplex[index] = -value
 
-        resultSimplexMaximization = linprog(C_simplex,A_ub=A_simplex, b_ub = B_simplex, A_eq=A_Eq_Simplex,b_eq=B_Eq_Simplex,method='simplex')
+        resultSimplexMaximization = linprog(C_simplex,A_ub=A_simplex, b_ub = B_simplex,
+                                            A_eq=A_Eq_Simplex if A_Eq_Simplex else None,b_eq=B_Eq_Simplex if B_Eq_Simplex else None,method='simplex')
 
         if resultSimplexMaximization.status == 0:
             maxResult  = -resultSimplexMaximization.fun
