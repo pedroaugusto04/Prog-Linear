@@ -248,22 +248,15 @@ def findPoints(request):
     resultSimplexMinimization = linprog(C_simplex,A_ub=A_simplex, b_ub = B_simplex,
                                             A_eq=A_Eq_Simplex if A_Eq_Simplex else None,b_eq=B_Eq_Simplex if B_Eq_Simplex else None,method='simplex')
 
-
-    resultSimplexMinimization += equacoes_map[0][len(equacoes_map[0])-1] # soma com a constante da funcao de otm
-
     for index,value in enumerate(C_simplex):
         C_simplex[index] = -value
 
     resultSimplexMaximization = linprog(C_simplex,A_ub=A_simplex, b_ub = B_simplex,
                                             A_eq=A_Eq_Simplex if A_Eq_Simplex else None,b_eq=B_Eq_Simplex if B_Eq_Simplex else None,method='simplex')
 
-
-    resultSimplexMaximization += equacoes_map[0][len(equacoes_map[0])-1] # soma com a constante da funcao de otm
-
-
     if resultSimplexMaximization.status == 0:
         if max_len > MAX_LEN_TO_BE_2D:
-            maxResult  = max(maxResult,-resultSimplexMaximization.fun)
+            maxResult  = max(maxResult,((-resultSimplexMaximization.fun) + equacoes_map[0][len(equacoes_map[0])-1])) # soma com a constante da funcao de otm
             for x in resultSimplexMaximization.x:
                 maxXSimplex.append(round(float(x),3))
     elif resultSimplexMaximization.status == 3:
@@ -271,7 +264,7 @@ def findPoints(request):
 
     if resultSimplexMinimization.status == 0:
         if max_len > MAX_LEN_TO_BE_2D:
-            minResult  = min(minResult,resultSimplexMinimization.fun)
+            minResult  = min(minResult,resultSimplexMinimization.fun + equacoes_map[0][len(equacoes_map[0])-1]) # soma com a constante da funcao de otm
             for x in resultSimplexMinimization.x:
                 minXSimplex.append(round(float(x),3))
     elif resultSimplexMinimization.status == 3:
