@@ -44,6 +44,9 @@ export class AppComponent {
   minResult: number = -1
   minResultX: number = -1
   minResultY: number = -1
+  maxXSimplex: number[] = []
+  minXSimplex: number[] = []
+  is2D: boolean = true;
 
   isMobile: boolean = false;
 
@@ -181,6 +184,8 @@ export class AppComponent {
     this.constCoef[0] = [];
     this.opCoef[0] = [];
 
+    let maxCoef = 0
+
     const filteredX = Object.entries(this.restrictionsForm.value)
     .filter(([key, value]) => key.startsWith('x') && /\d+/.test(key))
     .map(([key, value]) => ({ key, value: Number(value) }))
@@ -195,13 +200,25 @@ export class AppComponent {
 
     const coefIndex = parseInt(key.match(/\d+/)?.[0] || '0') - 1;  
 
+    const indexAux = parseInt(key.match(/_(\d+)/)?.[1] || '0');  
+
+    maxCoef = Math.max(maxCoef,indexAux)
+
     if (!this.varCoef[coefIndex]) {
       this.varCoef[coefIndex] = [];
     }
 
-    this.varCoef[coefIndex].push(value);
+    this.varCoef[coefIndex][indexAux] = value;
     });
 
+    this.varCoef.forEach(varArr => {
+      for (let i = 0; i <= maxCoef; i++) {
+        if (!varArr[i]){
+          varArr[i] = 0;
+        }
+      }
+    });
+    
     const filteredC = Object.entries(this.restrictionsForm.value)
     .filter(([key, value]) => key.startsWith('const_'))  
     .map(([key, value]) => Number(value));
@@ -243,6 +260,9 @@ export class AppComponent {
         this.intersections = data.intersections;
         this.valuesTested = data.valuesTested;
         this.axisRange = data.axisRange;
+        this.maxXSimplex = data.maxXSimplex
+        this.minXSimplex = data.minXSimplex
+        this.is2D = data.is2D;
 
         this.maxResult = -1;
         this.maxResultX = -1;
@@ -295,11 +315,17 @@ export class AppComponent {
 
     this.restrictionsForm.removeControl(`x${count}_${index}`);
 
-    this.restrictionsForm.removeControl(`op${count-1}_${index}`);
+    const oldOp = this.restrictionsForm.get(`op${count}Coef_${index}`)?.value;
+
+    this.restrictionsForm.removeControl(`op${count}Coef_${index}`);
 
     this.restrictions[index].variables.pop();
 
     this.restrictions[index].coefficients.splice(this.restrictions[index].coefficients.length -2,1);
+
+    if (index != 0){
+      this.restrictionsForm.get(`op${count-1}Coef_${index}`)?.setValue(oldOp ?? "=");
+    }
   }
       
 

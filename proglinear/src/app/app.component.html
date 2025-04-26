@@ -1,6 +1,6 @@
 <div class="content">
     <div class="title">
-      <p>Calculadora - Problemas de Otimização com 2 variáveis </p>
+      <p>Calculadora - Problemas de Otimização </p>
     </div>
     <div class="inputs">
       <form [formGroup]="restrictionsForm">
@@ -57,10 +57,12 @@
                       <button id="add-variable-button" mat-icon-button (click)="addNewVariableToRestriction(i)">
                         <mat-icon  matTooltip="Adicionar nova variável">library_add</mat-icon> 
                       </button>
-
-                      <button id="remove-variable-button" mat-icon-button (click)="removeRestrictionVariable(i)">
-                        <mat-icon matTooltip="Remover variável">backspace</mat-icon> 
-                      </button>
+                      
+                      @if(restriction.variables.length > 1){
+                        <button id="remove-variable-button" mat-icon-button (click)="removeRestrictionVariable(i)">
+                          <mat-icon matTooltip="Remover variável">backspace</mat-icon> 
+                        </button>
+                      }
                         
                     
                       @if(i > 1){
@@ -81,26 +83,57 @@
       <app-plotly [points]="points" [intersections]="intersections" [axisRange]="axisRange" class="graph"></app-plotly>
     </div>
     <div class = "results">
-      <button id = "see-results-button" type="button" (click)="openResultsModal()">Ver Detalhes</button>
-      <div class = "result">
-        @if(maxResult != -1){
-          <h2>Resultado maximização:</h2>
-          <h3>Maior valor: {{ maxResult === -2 ? 'Infinito' : maxResult }} </h3>
-          <h3>Encontrado para: x = {{maxResultX === -2? 'Infinito': maxResultX}}, y = {{maxResultY === -2? 'Infinito': maxResultY}} </h3>
-        } @else {
-          <h2>Não foram encontrados resultados para maximização</h2>
-        }
-      </div>
-
-      <div class = "result">
-        @if(minResult != -1){
-          <h2>Resultado minimização:</h2>
-          <h3>Menor valor: {{minResult}}</h3>
-          <h3>Encontrado para: x = {{minResultX}}, y = {{minResultY}} </h3>
-        } @else {
-          <h2>Não foram encontrados resultados para minimização</h2>
-        }
-      </div>
+      @if(is2D) {
+        <button id = "see-results-button" type="button" (click)="openResultsModal()">Ver Detalhes</button>
+      }
+      @if(is2D){
+        <div class = "result">
+          @if(maxResult != -1){
+            <h2>Resultado maximização:</h2>
+            <h3>Maior valor: {{ maxResult === -2 ? 'Infinito' : maxResult }} </h3>
+            <h3>Encontrado para: x1 = {{maxResultX === -2? 'Infinito': maxResultX}}, x2 = {{maxResultY === -2? 'Infinito': maxResultY}} </h3>
+          } @else {
+            <h2>Não foram encontrados resultados para maximização</h2>
+          }
+        </div>
+  
+        <div class = "result">
+          @if(minResult != -1){
+            <h2>Resultado minimização:</h2>
+            <h3>Menor valor: {{minResult}}</h3>
+            <h3>Encontrado para: x1 = {{minResultX}}, x2 = {{minResultY}} </h3>
+          } @else {
+            <h2>Não foram encontrados resultados para minimização</h2>
+          }
+        </div>
+      } @else {
+        <div class = "result">
+          @if(maxResult != -1){
+            <h2>Resultado maximização:</h2>
+            <h3>Maior valor: {{maxResult}} </h3>
+            <h3>Encontrado para:</h3>
+            @for(x of maxXSimplex; track i; let i = $index) {
+              <h3>x{{ i + 1 }} = {{ x }}</h3>
+            }
+          } @else {
+            <h2>Não foram encontrados resultados para maximização</h2>
+          }
+        </div>
+  
+        <div class = "result">
+          @if(minResult != -1){
+            <h2>Resultado minimização:</h2>
+            <h3>Menor valor: {{minResult}}</h3>
+            <h3>Encontrado para:</h3>
+            @for(x of minXSimplex; track i; let i = $index) {
+              <h3>x{{ i + 1 }} = {{ x }}</h3>
+            }
+          } @else {
+            <h2>Não foram encontrados resultados para minimização</h2>
+          }
+        </div>
+      }
+      
     </div>
     
   </div>
