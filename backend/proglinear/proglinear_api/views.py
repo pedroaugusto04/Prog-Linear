@@ -22,6 +22,7 @@ def ping(request):
 def findPoints(request):
 
     MAX_LEN_TO_BE_2D = 5
+    INFINITE_RESULT = 'Infinite'
 
     is2D = True
 
@@ -208,65 +209,74 @@ def findPoints(request):
     maxXSimplex = []
     minXSimplex = []
 
-    if max_len > MAX_LEN_TO_BE_2D:
-        A_simplex = []
-        B_simplex = []
-        C_simplex = []
-        A_Eq_Simplex = []
-        B_Eq_Simplex = []
+    A_simplex = []
+    B_simplex = []
+    C_simplex = []
+    A_Eq_Simplex = []
+    B_Eq_Simplex = []
 
-        for index,value in enumerate(equacoes_map[0]):
-            if not isinstance(value, (int, float)): continue
-            if index == len(equacoes_map[0]) -1: break
-            C_simplex.append(value)
+    for index,value in enumerate(equacoes_map[0]):
+        if not isinstance(value, (int, float)): continue
+        if index == len(equacoes_map[0]) -1: break
+        C_simplex.append(value)
 
-        i_ub = 0
-        i_eq = 0
-        for i in equacoes_map.keys():
-            if i == 0: continue  # Não processa a primeira (a primeira é o que queremos maximizar)
+    i_ub = 0
+    i_eq = 0
+    for i in equacoes_map.keys():
+        if i == 0: continue  # Não processa a primeira (a primeira é o que queremos maximizar)
 
-            lista = equacoes_map[i]
-            coef = []
+        lista = equacoes_map[i]
+        coef = []
 
-            for index, value in enumerate(lista):
-                if isinstance(value, (int, float)):
-                    if index == len(lista) - 1:
-                        b = value
-                    else:
-                        coef.append(value)
+        for index, value in enumerate(lista):
+            if isinstance(value, (int, float)):
+                if index == len(lista) - 1:
+                    b = value
+                else:
+                    coef.append(value)
 
-            if i in index_equal_simplex:
-                A_Eq_Simplex.append(coef)
-                B_Eq_Simplex.append(b)
-                i_eq += 1
-            else:
-                A_simplex.append(coef)
-                B_simplex.append(b)
-                i_ub += 1
+        if i in index_equal_simplex:
+            A_Eq_Simplex.append(coef)
+            B_Eq_Simplex.append(b)
+            i_eq += 1
+        else:
+            A_simplex.append(coef)
+            B_simplex.append(b)
+            i_ub += 1
 
 
-        resultSimplexMinimization = linprog(C_simplex,A_ub=A_simplex, b_ub = B_simplex,
-                                            A_eq=A_Eq_Simplex if A_Eq_Simplex else None,b_eq=B_Eq_Simplex if B_Eq_Simplex else None,method='simplex')
-
-        for index,value in enumerate(C_simplex):
-            C_simplex[index] = -value
-
-        resultSimplexMaximization = linprog(C_simplex,A_ub=A_simplex, b_ub = B_simplex,
+    resultSimplexMinimization = linprog(C_simplex,A_ub=A_simplex, b_ub = B_simplex,
                                             A_eq=A_Eq_Simplex if A_Eq_Simplex else None,b_eq=B_Eq_Simplex if B_Eq_Simplex else None,method='simplex')
 
 
-        print(resultSimplexMaximization)
-        print(resultSimplexMinimization)
+    resultSimplexMinimization += equacoes_map[0][len(equacoes_map[0])-1] # soma com a constante da funcao de otm
 
-        if resultSimplexMaximization.status == 0:
-            maxResult  = -resultSimplexMaximization.fun
+    for index,value in enumerate(C_simplex):
+        C_simplex[index] = -value
+
+    resultSimplexMaximization = linprog(C_simplex,A_ub=A_simplex, b_ub = B_simplex,
+                                            A_eq=A_Eq_Simplex if A_Eq_Simplex else None,b_eq=B_Eq_Simplex if B_Eq_Simplex else None,method='simplex')
+
+
+    resultSimplexMaximization += equacoes_map[0][len(equacoes_map[0])-1] # soma com a constante da funcao de otm
+
+
+    if resultSimplexMaximization.status == 0:
+        if max_len > MAX_LEN_TO_BE_2D:
+            maxResult  = max(maxResult,-resultSimplexMaximization.fun)
             for x in resultSimplexMaximization.x:
                 maxXSimplex.append(round(float(x),3))
+    elif resultSimplexMaximization.status == 3:
+        maxResult = INFINITE_RESULT
 
-        if resultSimplexMinimization.status == 0:
-            minResult  = resultSimplexMinimization.fun
+    if resultSimplexMinimization.status == 0:
+        if max_len > MAX_LEN_TO_BE_2D:
+            minResult  = min(minResult,resultSimplexMinimization.fun)
             for x in resultSimplexMinimization.x:
                 minXSimplex.append(round(float(x),3))
+    elif resultSimplexMinimization.status == 3:
+        minResult = INFINITE_RESULT
+
 
     # percorre as intersecoes ( metodo grafico )
     for intersection in intersections:
@@ -283,11 +293,11 @@ def findPoints(request):
         maxAxisY = max(maxAxisY, float(intersection[1]))
 
 
-        if result > maxResult:
+        if maxResult != INFINITE_RESULT and result > maxResult:
             maxResult = result
             maxResultX = intersection[0]
             maxResultY = intersection[1]
-        if result < minResult:
+        if minResult != INFINITE_RESULT and result < minResult:
             minResult = result
             minResultX = intersection[0]
             minResultY = intersection[1]
@@ -305,14 +315,23 @@ def findPoints(request):
         'points': points,
         'intersections': intersections,
         'valuesTested': valuesTested,
-        'maxResult': float(maxResult) if maxResult != -sys.maxsize else None,
+        'maxResult': (
+            None if maxResult == -sys.maxsize
+            else 'Infinite' if maxResult == 'Infinite'
+            else float(maxResult)
+        ),
         'maxResultX': float(maxResultX)  if maxResultX != -sys.maxsize else None,
         'maxResultY': float(maxResultY) if maxResultY != -sys.maxsize else None,
-        'minResult': float(minResult) if minResult != sys.maxsize and minResult != -sys.maxsize else None,
+        'minResult': (
+            None if minResult == -sys.maxsize
+            else None if minResult == sys.maxsize
+            else 'Infinite' if minResult == 'Infinite'
+            else float(minResult)
+        ),
         'minResultX': float(minResultX) if minResultX != sys.maxsize and minResultX != -sys.maxsize else None,
         'minResultY': float(minResultY) if minResultY != sys.maxsize and minResultY != -sys.maxsize else None,
         'maxXSimplex': maxXSimplex,
-        'minXSimplex':minXSimplex,
+        'minXSimplex': minXSimplex,
         'axisRange': axisRange,
         'is2D': is2D
     }
