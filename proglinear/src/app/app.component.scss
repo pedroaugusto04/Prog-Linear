@@ -10,25 +10,20 @@ form {
 }
 
 #field-function {
-    width: 300px;
+    width: 30rem;
 }
 
 
 .input {
     display: flex;
     align-items: center;
-    gap: 8px;
-    width: 800px;
+    width: 50rem;
 }
-
-#input_0 {
-    width: 715px;
-}
-
-
 
 mat-form-field {
     margin: 2rem;
+    width: 6rem;
+    flex-shrink: 0;
 }
 
 .title {
@@ -41,8 +36,8 @@ mat-form-field {
 
 .content {
     height: 100%;
-    width: 100%;  
-    height: auto; 
+    width: 100%;
+    height: auto;
     overflow: hidden;
 }
 
@@ -53,21 +48,20 @@ mat-form-field {
 }
 
 .content-inputs {
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
     background-color: #F0F0F0;
-    width: 800px;
-    max-height: 300px;
-    overflow-y: auto; 
-    overflow-x: hidden;
+    width: 60rem;
+    max-height: 500px;
+    overflow-x: auto;
+    overflow-y: auto;
 }
 
-.restrition-inputs {
+.restriction-inputs {
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: left;
     align-items: center;
+    width: 100%;
+    height: 100%;
 }
 
 .inputs {
@@ -87,36 +81,65 @@ mat-form-field {
     max-width: 800px;
 }
 
+.button-restrictions {
+    display: flex;
+    justify-content: left;
+    align-items: center;
+    width: 100%;
+    position: sticky;
+    top: 0;
+    left:0;
+}
+
+
 button {
     all: unset;
     cursor: pointer;
     margin: 1rem;
     font-size: 2rem;
     border-radius: 0.5rem;
-    color: #f0f0f0; 
-    background-color: #222222; 
+    color: #f0f0f0;
+    background-color: #222222;
     padding: 0.2rem 0.5rem;
     transition: background-color 0.3s, color 0.3s, transform 0.2s ease-in-out;
 }
 
 #add-button {
     background-color: #4A90E2;
+    position: sticky; 
+    top: 0;
+    left:0;
+}
+
+#add-variable-button,
+#remove-variable-button {
+    color: white;
+    background-color: black;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+}
+
+#add-var-button {
+    background-color: #4A90E2;
 }
 
 #delete-button {
-    background-color: #D44D4D; 
+    background-color: #D44D4D;
 }
 
-#submit-button, #see-results-button {
+#submit-button,
+#see-results-button {
     color: black;
     background-color: white;
     margin-top: 2rem;
     margin-bottom: 2rem;
 }
 
-#submit-button:hover, .op-button:hover, #see-results-button:hover {
-    background-color: #4A90E2; 
-    color: #f0f0f0; 
+#submit-button:hover,
+.op-button:hover,
+#see-results-button:hover {
+    background-color: #4A90E2;
+    color: #f0f0f0;
     transform: translateY(-2px);
 }
 
@@ -134,10 +157,11 @@ button {
     display: flex;
     justify-content: center;
     align-items: center;
-    flex-direction: row;
+    flex-direction: column;
 }
 
-.result h2, .result h3 {
+.result h2,
+.result h3 {
     margin: 1rem;
 }
 
@@ -146,13 +170,14 @@ button {
     width: 100%;
 }
 
-@media screen and (max-width: 800px) {
+@media screen and (max-width: 1025px) {
+
+    .content-inputs {
+        max-width: 35rem;
+    }
+    
     .input {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 3px;
-        margin-left: 2rem;
+        max-width: 100%;
     }
 
     #input_0 {
@@ -162,13 +187,11 @@ button {
     #input_1 {
         margin-right: 2.8rem;
     }
+}
 
-    mat-form-field {
-        margin: 0rem;
-        width: 65px;
-    }
+@media screen and (max-width: 800px) {
 
-    button {
-        margin: 0.2rem;
+    .content-inputs {
+        max-width: 23rem;
     }
 }

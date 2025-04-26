@@ -25,7 +25,7 @@ export class PlotlyComponent implements OnChanges, OnInit {
   constructor(private mobileObserver: BreakpointObserver) {}
 
   ngOnInit() {
-    this.mobileObserver.observe(['(max-width: 800px)']).subscribe((screenSize) => {
+    this.mobileObserver.observe(['(max-width: 1000px)']).subscribe((screenSize) => {
       if (screenSize.matches) {
         this.isMobile = true;
       } else {
@@ -34,8 +34,8 @@ export class PlotlyComponent implements OnChanges, OnInit {
 
       this.graph.layout = {
         ...this.graph.layout,
-        width: this.isMobile ? 350 : 1000,
-        height: this.isMobile ? 350 : 600,
+        width: this.isMobile ? 410 : 1000,
+        height: this.isMobile ? 410 : 600,
       };
     });
   }
@@ -134,8 +134,6 @@ export class PlotlyComponent implements OnChanges, OnInit {
   updateRange() {
     if (!this.axisRange) return;
 
-    console.log(this.axisRange);
-
     this.graph.layout = {
       ...this.graph.layout,
       xaxis: {
@@ -147,8 +145,6 @@ export class PlotlyComponent implements OnChanges, OnInit {
         range: [this.axisRange.minY - 10,this.axisRange.maxY + 10]
       },
     };
-
-    console.log(this.graph.layout);
   }
   
 }
