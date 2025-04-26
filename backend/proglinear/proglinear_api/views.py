@@ -8,6 +8,7 @@ from django.http import JsonResponse
 from sympy import symbols, Eq, solve, Matrix,Le,Ge,Lt,Gt,oo
 from dotenv import load_dotenv
 from pathlib import Path
+from scipy.optimize import linprog
 
 
 if os.getenv("ENV") != "production":
@@ -19,35 +20,57 @@ def ping(request):
 
 @api_view(['POST'])
 def findPoints(request):
+
+    MAX_LEN_TO_BE_2D = 5
+
+    is2D = True
+
     equacoes_str = request.data.get("equacoes", [])
 
-    num_colunas = len(equacoes_str[0])
+    num_colunas = len(equacoes_str[0][0])
 
     # associa cada indice aos valores da eq correspondente
     equacoes_map = {i: [] for i in range(num_colunas)}
 
-    for linha in equacoes_str:
+    for linha in equacoes_str[0]:
         for i, valor in enumerate(linha):
             equacoes_map[i].append(valor)
 
+    for linha in equacoes_str[1]:
+        for i,valor in enumerate(linha):
+            equacoes_map[i].append(valor)
+
+    for index,linha in enumerate(equacoes_str[2]):
+        for i,valor in enumerate(linha):
+            equacoes_map[index].insert(-1,valor)
+
+    max_len = max(len(valores) for valores in equacoes_map.values())
+
+    if max_len > MAX_LEN_TO_BE_2D:
+        is2D = False
 
     # aplica o sinal da operacao
-
     for i in equacoes_map.keys():
         lista = equacoes_map[i]
-        for index,valor in enumerate(lista[1:]):
-            indexOp = index + int((len(lista)) / 2) + 1
-            if indexOp >= len(lista):  break
-            valorOp = lista[indexOp]
-            if valorOp == '-':
-                lista[index+1] = -valor
+        indexStart = 0
+        indexOpStart = int((len(lista)/2)-1)
+        indexOpEnd = len(lista) - 2
 
+        if lista[indexOpEnd] == '-':
+            lista[indexOpEnd+1] = -lista[indexOpEnd+1]
+        while indexOpStart < indexOpEnd and isinstance(lista[indexStart], (int, float)):
+            valorOp = lista[indexOpStart]
+            if valorOp == '-':
+                lista[indexStart] = -lista[indexStart]
+            indexStart += 1
+            indexOpStart += 1
 
     points = []
     intersections = []
     equations = []
     inequations = []
     valuesTested = []
+    index_equal_simplex = set()
 
     # monta o sistema de  inequacoes para verificacao das intersecoes
     for i in equacoes_map.keys():
@@ -55,93 +78,115 @@ def findPoints(request):
 
         lista = equacoes_map[i]
 
-        vars = symbols(f'x1:{len(lista)-2}')
+        if lista[len(lista)-2] == '<':
+            lista[len(lista)-2] = '<='
+        elif lista[len(lista)-2] == '>=' or lista[len(lista)-2] == '>':
+            for index,value in enumerate(lista):
+                if not isinstance(value, (int, float)): continue
+                lista[index] = -value
 
-        lhs = 0
-        for index,var in enumerate(vars):
-            lhs += lista[index] * var
-
-        rhs = lista[len(lista)-3]
-
-        op2 = lista[4]
-
-        if op2 == '=':
-            inequations.append(Eq(lhs, rhs))
-        elif op2 == '<=':
-            inequations.append(Le(lhs, rhs))
-        elif op2 == '>=':
-            inequations.append(Ge(lhs, rhs))
-        elif op2 == '<':
-            inequations.append(Lt(lhs, rhs))
-        elif op2 == '>':
-            inequations.append(Gt(lhs, rhs))
-
-    # verifica 2 pontos para cada equacao ( no caso de ate 2 variaveis )
-
-    for i in equacoes_map.keys():
-        lista = equacoes_map[i]
-
-        x1, x2 = symbols('x1 x2')
-
-        A = Matrix([[lista[0],lista[1]]])
-        b = Matrix([lista[2]])
-
-        solution = solve(A * Matrix([x1, x2]) - b, (x1, x2))
-
-
-        if i != 0:
-            for var in solution:
-                equations.append(Eq(var, solution[var]))
-
-        if lista[0] != 0: # x != 0
-            if not solution: continue
-
-            x_expr = solution[x1]
-            y1v = float(os.getenv("MIN_VAR", "-100")) # first point
-            y2v = float(os.getenv("MAX_VAR", "100")) # second point
-
-            x1v = float(x_expr.subs(x2, y1v))
-            x2v = float(x_expr.subs(x2,y2v))
-            points.append([x1v, y1v, x2v, y2v])
+        if lista[len(lista)-2] != "=":
+            lista[len(lista) - 2] = '<='
         else:
-            if not solution: continue
+            index_equal_simplex.add(i)
 
-            y_expr = solution[x2]
-            x1v = float(os.getenv("MIN_VAR", "-100")) # first point
-            x2v = float(os.getenv("MAX_VAR", "100")) # second point
+        if max_len <= MAX_LEN_TO_BE_2D:
+            vars = symbols(f'x1:{int((max_len)/2)+1}')
 
-            y1v = float(y_expr.subs(x1,x1v))
-            y2v = float(y_expr.subs(x1, x2v))
-            points.append([x1v, y1v, x2v, y2v])
+            lhs = 0
 
-    for i in range(len(equations)):
-        for j in range(i + 1, len(equations)):
-            if equations[i] == equations[j]: continue
-            sol = solve((equations[i], equations[j]), (x1, x2))
-            if sol:
-                intersections.append([float(sol[x1]), float(sol[x2]),True])
+            for index,var in enumerate(vars):
+                lhs += float(lista[index]) * var
+
+            rhs = lista[len(lista)-1]
+
+            op2 = lista[len(lista) -2]
+
+            if op2 == '=':
+                inequations.append(Eq(lhs, rhs))
+            elif op2 == '<=':
+                inequations.append(Le(lhs, rhs))
+            elif op2 == '>=':
+                inequations.append(Ge(lhs, rhs))
+            elif op2 == '<':
+                inequations.append(Lt(lhs, rhs))
+            elif op2 == '>':
+                inequations.append(Gt(lhs, rhs))
+
+    # busca as equacoes (ate 2d)
+    if max_len <= MAX_LEN_TO_BE_2D:
+        for i in equacoes_map.keys():
+            lista = equacoes_map[i]
+
+            vars = symbols(f'x1:{int((max_len)/2)+1}')
+
+            A = Matrix([lista[:len(vars)]])
+            b = Matrix([lista[len(lista) -1]])
+
+            solution = solve(A * Matrix(vars) - b, vars)
+
+            if i != 0:
+                for var in solution:
+                    equations.append(Eq(var, solution[var]))
+
+            # verifica 2 pontos para formar o grafico ( no caso de ate 2 variaveis )
+            if lista[0] != 0: # x != 0
+                if not solution: continue
+
+                x1,x2 = symbols('x1 x2')
+
+                x_expr = solution[x1]
+                y1v = float(os.getenv("MIN_VAR", "-100")) # first point
+                y2v = float(os.getenv("MAX_VAR", "100")) # second point
+
+                x1v = float(x_expr.subs(x2, y1v))
+                x2v = float(x_expr.subs(x2,y2v))
+                points.append([x1v, y1v, x2v, y2v])
+            else:
+                if not solution: continue
+
+                y_expr = solution[x2]
+                x1v = float(os.getenv("MIN_VAR", "-100")) # first point
+                x2v = float(os.getenv("MAX_VAR", "100")) # second point
+
+                y1v = float(y_expr.subs(x1,x1v))
+                y2v = float(y_expr.subs(x1, x2v))
+                points.append([x1v, y1v, x2v, y2v])
 
 
-    # verifica quais intersecoes sao validas ( respeitam as inequacoes e quais nao )
-    for inequation in inequations:
-        for intersection in intersections:
-            value = {x1: intersection[0],x2: intersection[1]}
 
-            valid = inequation.subs(value)
+    # resolve as inequacoes ( ate 2d)
+    if max_len <= MAX_LEN_TO_BE_2D:
+        for i in range(len(equations)):
+            for j in range(i + 1, len(equations)):
+                if equations[i] == equations[j]: continue
+                sol = solve((equations[i], equations[j]), vars)
+                if sol:
+                    intersections.append([float(sol[v]) for v in vars] + [True])
 
-            if not valid:
-                intersection[2] = False
+
+    # verifica quais intersecoes sao validas ( respeitam as inequacoes e quais nao - ate 2d )
+    if max_len <= MAX_LEN_TO_BE_2D:
+        for inequation in inequations:
+            for intersection in intersections:
+                value = {x1: intersection[0],x2: intersection[1]}
+
+                valid = inequation.subs(value)
+
+                if not valid:
+                    intersection[2] = False
 
 
     # recupera funcao que o usuario deseja otimizar
-    listaFuncaoOtimiza = equacoes_map[0]
+    if max_len <= MAX_LEN_TO_BE_2D:
+        listaFuncaoOtimiza = equacoes_map[0]
 
-    vars = symbols(f'x1:{len(listaFuncaoOtimiza)-2}')
+        vars = symbols(f'x1:{int((max_len)/2)+1}')
 
-    funcaoOtimiza = 0
+        funcaoOtimiza = 0
 
-    for index,var in enumerate(vars):
-        funcaoOtimiza += listaFuncaoOtimiza[index] * var
+        for index,var in enumerate(vars):
+            funcaoOtimiza += listaFuncaoOtimiza[index] * var
 
     maxResult = -sys.maxsize
     maxResultX = -sys.maxsize
@@ -157,6 +202,63 @@ def findPoints(request):
     minAxisY = sys.maxsize
     maxAxisY = -sys.maxsize
 
+
+    maxXSimplex = []
+    minXSimplex = []
+
+    if max_len > MAX_LEN_TO_BE_2D:
+        A_simplex = []
+        B_simplex = []
+        C_simplex = []
+        A_Eq_Simplex = []
+        B_Eq_Simplex = []
+
+        for index,value in enumerate(equacoes_map[0]):
+            if not isinstance(value, (int, float)): continue
+            if index == len(equacoes_map[0]) -1: break
+            C_simplex.append(value)
+
+        i_ub = 0
+        i_eq = 0
+        for i in equacoes_map.keys():
+            if i == 0: continue  # Não processa a primeira (a primeira é o que queremos maximizar)
+
+            lista = equacoes_map[i]
+            coef = []
+
+            for index, value in enumerate(lista):
+                if isinstance(value, (int, float)):
+                    if index == len(lista) - 1:
+                        b = value
+                    else:
+                        coef.append(value)
+
+            if i in index_equal_simplex:
+                A_Eq_Simplex.append(coef)
+                B_Eq_Simplex.append(b)
+                i_eq += 1
+            else:
+                A_simplex.append(coef)
+                B_simplex.append(b)
+                i_ub += 1
+
+
+        resultSimplexMinimization = linprog(C_simplex,A_ub=A_simplex, b_ub = B_simplex, A_eq=A_Eq_Simplex,b_eq=B_Eq_Simplex,method='simplex')
+
+        for index,value in enumerate(C_simplex):
+            C_simplex[index] = -value
+
+        resultSimplexMaximization = linprog(C_simplex,A_ub=A_simplex, b_ub = B_simplex, A_eq=A_Eq_Simplex,b_eq=B_Eq_Simplex,method='simplex')
+
+        if resultSimplexMaximization.status == 0:
+            maxResult  = -resultSimplexMaximization.fun
+            for x in resultSimplexMaximization.x:
+                maxXSimplex.append(round(float(x),3))
+
+        if resultSimplexMinimization.status == 0:
+            minResult  = resultSimplexMinimization.fun
+            for x in resultSimplexMinimization.x:
+                minXSimplex.append(round(float(x),3))
 
     # percorre as intersecoes ( metodo grafico )
     for intersection in intersections:
@@ -201,7 +303,10 @@ def findPoints(request):
         'minResult': float(minResult) if minResult != sys.maxsize and minResult != -sys.maxsize else None,
         'minResultX': float(minResultX) if minResultX != sys.maxsize and minResultX != -sys.maxsize else None,
         'minResultY': float(minResultY) if minResultY != sys.maxsize and minResultY != -sys.maxsize else None,
-        'axisRange': axisRange
+        'maxXSimplex': maxXSimplex,
+        'minXSimplex':minXSimplex,
+        'axisRange': axisRange,
+        'is2D': is2D
     }
 
     return JsonResponse(response_data, safe=False)
